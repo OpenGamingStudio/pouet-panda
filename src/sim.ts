@@ -61,6 +61,8 @@ export class Sim {
   deathTime = 0;
   slowLeft = 0;
   events: SimEvent[] = [];
+  /** Mode assisté : vitesse réduite et gravité douce (même progression). */
+  assist = false;
   private pending = false;
   private nextIndex = 0;
   private lastGap = C.H / 2;
@@ -145,7 +147,7 @@ export class Sim {
 
   /** Vitesse de défilement courante. */
   currentSpeed(): number {
-    const base = Math.min(C.SPEED_MAX, C.SPEED_START + C.SPEED_PER_POINT * this.score);
+    const base = Math.min(C.SPEED_MAX, C.SPEED_START + C.SPEED_PER_POINT * this.score) * (this.assist ? C.ASSIST_SPEED : 1);
     return this.dash > 0 ? base * C.DASH_SPEED : base;
   }
 
@@ -225,7 +227,7 @@ export class Sim {
       this.y += (ty - this.y) * Math.min(1, C.DASH_STEER * dt);
       this.vy = 0;
     } else {
-      const g = this.swampActive() ? C.SWAMP_GRAVITY : C.GRAVITY;
+      const g = (this.swampActive() ? C.SWAMP_GRAVITY : C.GRAVITY) * (this.assist ? C.ASSIST_GRAVITY : 1);
       this.vy += g * dt;
       if (this.gust && this.gust.warn <= 0 && this.gust.left > 0) this.vy += this.gust.dir * C.GUST_FORCE * dt;
       if (this.vy > C.MAX_FALL) this.vy = C.MAX_FALL;
@@ -287,7 +289,8 @@ export class Sim {
   }
 
   private applyFlap(): void {
-    this.vy = this.swampActive() ? C.SWAMP_FLAP_VY : C.FLAP_VY;
+    // en mode assisté, l'impulsion suit la racine de la gravité : même hauteur de saut, vol plus long
+    this.vy = (this.swampActive() ? C.SWAMP_FLAP_VY : C.FLAP_VY) * (this.assist ? Math.sqrt(C.ASSIST_GRAVITY) : 1);
     this.emit({ t: 'flap' });
   }
 

@@ -50,3 +50,7 @@ Tailwind CSS v4 en socle (`@theme` dans `src/style.css`), compilé au build par 
 
 Les issues et les pull requests sont bienvenues. Les contributions sont vérifiées (cohérence, pertinence, fonctionnement) puis relues par l'équipe avant fusion sur `main`.
 Issues and pull requests are welcome. Contributions are checked and reviewed by the team before being merged into `main`.
+
+## Accessibilité
+
+Clavier, lecteur d'écran, mode assisté, mouvements réduits, volume réglable : voir [ACCESSIBILITY.md](ACCESSIBILITY.md).

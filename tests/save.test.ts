@@ -84,3 +84,27 @@ describe('boutique', () => {
     expect(buy(s, 'nimporte')).toBe('unknown');
   });
 });
+
+describe('réglages d\'accessibilité', () => {
+  it('valeurs par défaut : volume 100, assisté non, touche W', () => {
+    const l = load(fake());
+    expect(l.data.settings).toMatchObject({ volume: 100, assist: false, flapKey: 'KeyW' });
+  });
+
+  it('une ancienne sauvegarde (sans les nouveaux réglages) reste lisible', () => {
+    const l = load(fake({ [SAVE_KEY]: JSON.stringify({ v: 1, best: 4, settings: { sound: false } }) }));
+    expect(l.data.best).toBe(4);
+    expect(l.data.settings.sound).toBe(false);
+    expect(l.data.settings.volume).toBe(100);
+  });
+
+  it('valeurs invalides ou touches réservées rejetées, volume borné', () => {
+    const raw = { v: 1, settings: { volume: 900, assist: 'oui', flapKey: 'Escape' } };
+    const l = load(fake({ [SAVE_KEY]: JSON.stringify(raw) }));
+    expect(l.data.settings.volume).toBe(100);
+    expect(l.data.settings.assist).toBe(false);
+    expect(l.data.settings.flapKey).toBe('KeyW');
+    const ok = load(fake({ [SAVE_KEY]: JSON.stringify({ v: 1, settings: { volume: 35, assist: true, flapKey: 'KeyJ' } }) }));
+    expect(ok.data.settings).toMatchObject({ volume: 35, assist: true, flapKey: 'KeyJ' });
+  });
+});

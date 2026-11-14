@@ -211,3 +211,43 @@ describe('Orage', () => {
     expect(s.events.some((e) => e.t === 'gustWarn')).toBe(true);
   });
 });
+
+describe('mode assisté', () => {
+  it('défile plus lentement et saute à la même hauteur, vol plus long', () => {
+    const a = new Sim(5);
+    const b = new Sim(5);
+    b.assist = true;
+    expect(b.currentSpeed()).toBeCloseTo(a.currentSpeed() * C.ASSIST_SPEED);
+    const peak = (s: Sim): number => {
+      s.flap();
+      let min = s.y;
+      for (let i = 0; i < 400; i++) {
+        s.step();
+        if (s.phase === 'playing') min = Math.min(min, s.y);
+      }
+      return min;
+    };
+    const ya = peak(a);
+    const yb = peak(b);
+    expect(Math.abs(ya - yb)).toBeLessThan(6); // même hauteur de saut (au pas près)
+  });
+
+  it('même progression : les points et les pièces ne sont pas modifiés par le mode', () => {
+    const a = new Sim(7);
+    const b = new Sim(7);
+    b.assist = true;
+    autoplay(a, 120 * 60, 12);
+    autoplay(b, 120 * 60, 12);
+    expect(a.score).toBeGreaterThanOrEqual(12);
+    expect(b.score).toBeGreaterThanOrEqual(12);
+    // le niveau (ouvertures, pièces) vient de la graine seule ; les gains ne dépendent pas du mode
+    const shape = (x: Sim) => x.pairs.slice(0, 3).map((p) => [p.index, p.baseY, p.gap, p.coin?.y]);
+    expect(shape(b).map((r) => r[0])).not.toEqual([]);
+    const first = new Sim(7);
+    const firstAssist = new Sim(7);
+    firstAssist.assist = true;
+    expect(shape(firstAssist)).toEqual(shape(first));
+    expect(a.recordBonus(0)).toBe(0);
+    expect(b.recordBonus(0)).toBe(0);
+  });
+});

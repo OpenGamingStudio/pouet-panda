@@ -49,11 +49,20 @@ body {
   .btn:active:not(:disabled) {
     @apply translate-x-1 translate-y-1 shadow-none;
   }
+  /* Focus visible sur tous les fonds : filet encre cerné de blanc (contraste >= 3:1 des deux côtés) */
   .btn:focus-visible,
   .tab:focus-visible,
-  .card:focus-visible,
-  .seg:focus-visible {
-    @apply outline-4 outline-offset-2 outline-ink;
+  .card-pic:focus-visible,
+  .seg:focus-visible,
+  .range:focus-visible {
+    outline: 3px solid #16110f;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 9px #ffffff;
+    position: relative;
+    z-index: 1;
+  }
+  .btn[role="switch"][aria-checked="true"] {
+    @apply bg-bamboo;
   }
   .btn-sun {
     @apply bg-sun;
@@ -99,8 +108,28 @@ body {
     border-radius: 16px 22px 14px 20px;
     touch-action: manipulation;
   }
-  .card[aria-pressed="true"] {
-    @apply bg-sun;
+  .card-pic {
+    @apply block w-full rounded-xl;
+    touch-action: manipulation;
+  }
+  /* Curseur de volume : aplats, sans dégradé */
+  .range {
+    @apply block h-11 w-full cursor-pointer bg-transparent;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .range::-webkit-slider-runnable-track {
+    @apply h-4 rounded-full border-[3px] border-ink bg-white;
+  }
+  .range::-moz-range-track {
+    @apply h-4 rounded-full border-[3px] border-solid border-ink bg-white;
+  }
+  .range::-webkit-slider-thumb {
+    @apply -mt-2.5 h-8 w-8 rounded-full border-[3px] border-ink bg-sun shadow-hard-sm;
+    -webkit-appearance: none;
+  }
+  .range::-moz-range-thumb {
+    @apply h-7 w-7 rounded-full border-[3px] border-solid border-ink bg-sun;
   }
   .seg {
     @apply min-h-12 flex-1 border-[3px] border-ink bg-white px-3 text-lg font-bold;
