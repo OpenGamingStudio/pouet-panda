@@ -241,7 +241,37 @@ export function drawChili(ctx: CanvasRenderingContext2D, x: number, y: number, t
   ctx.restore();
 }
 
-function bambooPart(ctx: CanvasRenderingContext2D, x: number, y0: number, y1: number, color: string, capAtBottom: boolean): void {
+/** Motif d'un biome sur la tige : les biomes se reconnaissent par la forme, pas seulement par la couleur. */
+function stalkPattern(ctx: CanvasRenderingContext2D, id: string, bx: number, bw: number, y0: number, y1: number, dark: string): void {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(bx, y0, bw, y1 - y0);
+  ctx.clip();
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const a = Math.floor(y0 / 32) * 32;
+  if (id === 'bamboo') {
+    ctx.fillStyle = dark;
+    for (let ny = Math.floor(y0 / 64) * 64 + 20; ny < y1; ny += 64) {
+      if (ny < y0 + 6 || ny > y1 - 10) continue;
+      ctx.fillRect(bx - 2, ny, bw + 4, 7);
+      ctx.strokeRect(bx - 2, ny, bw + 4, 7);
+    }
+  } else if (id === 'ice') { // éclats en diagonale
+    for (let y = a; y < y1 + 20; y += 32) { ctx.beginPath(); ctx.moveTo(bx + 6, y + 16); ctx.lineTo(bx + bw - 6, y); ctx.stroke(); }
+  } else if (id === 'fire') { // braises : deux points décalés
+    ctx.fillStyle = INK;
+    for (let y = a, i = 0; y < y1 + 20; y += 24, i++) { ctx.beginPath(); ctx.arc(bx + (i % 2 ? bw * 0.7 : bw * 0.3), y + 10, 4, 0, Math.PI * 2); ctx.fill(); }
+  } else if (id === 'swamp') { // ondulation
+    ctx.beginPath();
+    for (let y = a, i = 0; y < y1 + 20; y += 12, i++) { const x = bx + bw / 2 + (i % 2 ? 9 : -9); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+    ctx.stroke();
+  } else if (id === 'storm') { // chevrons
+    for (let y = a; y < y1 + 20; y += 30) { ctx.beginPath(); ctx.moveTo(bx + 7, y + 6); ctx.lineTo(bx + bw / 2, y + 18); ctx.lineTo(bx + bw - 7, y + 6); ctx.stroke(); }
+  }
+  ctx.restore();
+}
+
+function bambooPart(ctx: CanvasRenderingContext2D, x: number, y0: number, y1: number, color: string, capAtBottom: boolean, biomeId: string, moving: boolean): void {
   const w = C.BAMBOO_W;
   const dark = mix(color, INK, 0.28);
   ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
@@ -251,18 +281,19 @@ function bambooPart(ctx: CanvasRenderingContext2D, x: number, y0: number, y1: nu
   ctx.fillStyle = color;
   ctx.fillRect(bx, bodyY0, w - 12, bodyY1 - bodyY0);
   ctx.strokeRect(bx, bodyY0, w - 12, bodyY1 - bodyY0);
-  // nœuds
-  ctx.fillStyle = dark;
-  for (let ny = Math.floor(bodyY0 / 64) * 64 + 20; ny < bodyY1; ny += 64) {
-    if (ny < bodyY0 + 6 || ny > bodyY1 - 10) continue;
-    ctx.fillRect(bx - 2, ny, w - 8, 7);
-    ctx.strokeRect(bx - 2, ny, w - 8, 7);
-  }
+  stalkPattern(ctx, biomeId, bx, w - 12, bodyY0, bodyY1, dark);
   // bague au bord de l'ouverture
   const cy = capAtBottom ? y0 : y1 - 16;
   ctx.fillStyle = color;
   ctx.fillRect(x - w / 2, cy, w, 16);
   ctx.strokeRect(x - w / 2, cy, w, 16);
+  if (moving) { // ouverture mobile : double flèche sur la bague
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.moveTo(x - 7, cy + 7); ctx.lineTo(x, cy + 2); ctx.lineTo(x + 7, cy + 7);
+    ctx.moveTo(x - 7, cy + 10); ctx.lineTo(x, cy + 15); ctx.lineTo(x + 7, cy + 10);
+    ctx.fill();
+  }
 }
 
 // ---------------------------------------------------------------- décor
@@ -380,8 +411,8 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: View, s: Scene): voi
     for (const p of sim.pairs) {
       const x = p.x - off;
       if (x < -C.BAMBOO_W || x > C.W + C.BAMBOO_W) continue;
-      bambooPart(ctx, x, -20, p.y - p.gap / 2, b.bamboo, false);
-      bambooPart(ctx, x, p.y + p.gap / 2, C.GROUND_Y, b.bamboo, true);
+      bambooPart(ctx, x, -20, p.y - p.gap / 2, b.bamboo, false, s.biomeId, p.moving);
+      bambooPart(ctx, x, p.y + p.gap / 2, C.GROUND_Y, b.bamboo, true, s.biomeId, p.moving);
       if (p.coin && !p.coin.taken) drawCoin(ctx, x, p.coin.y, sim.time);
       if (p.chili && !p.chili.taken) drawChili(ctx, x, p.y, sim.time);
     }
@@ -403,7 +434,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: View, s: Scene): voi
   const g = sim.gust;
   if (g && sim.phase === 'playing') {
     const warn = g.warn > 0;
-    if (!warn || Math.floor(sim.time * 8) % 2 === 0) drawArrow(ctx, C.W - 38, C.H * 0.35, g.dir, warn);
+    if (!warn || s.reduced || Math.floor(sim.time * 5) % 2 === 0) drawArrow(ctx, C.W - 38, C.H * 0.35, g.dir, warn);
     if (!warn && !s.reduced) {
       ctx.fillStyle = '#FFFFFF';
       for (let i = 0; i < 6; i++) ctx.fillRect(((i * 97 + sim.time * 420) % (C.W + 60)) - 30, 90 + i * 70, 34, 4);
@@ -415,7 +446,10 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: View, s: Scene): voi
     s.fx.draw(ctx);
     const px = s.pandaX ?? C.PANDA_X;
     const py = sim.prevY + (sim.y - sim.prevY) * s.alpha;
-    const blink = sim.invincible > 0 && sim.dash <= 0 && Math.floor(sim.time * 14) % 2 === 0;
+    // pas plus de 3 clignotements par seconde ; avec les mouvements réduits : translucide, sans clignoter
+    const inv = sim.invincible > 0 && sim.dash <= 0;
+    const blink = inv && !s.reduced && Math.floor(sim.time * 5) % 2 === 0;
+    ctx.globalAlpha = inv && s.reduced ? 0.55 : 1;
     if (!blink) {
       if (sim.shield && sim.phase !== 'dead') {
         ctx.beginPath(); ctx.arc(px, py, 29, 0, Math.PI * 2);
@@ -424,7 +458,15 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: View, s: Scene): voi
         ctx.beginPath(); ctx.arc(px, py, 31, 0, Math.PI * 2); ctx.stroke();
       }
       drawPanda(ctx, px, py, sim.angle, s.look, s.pandaScale ?? 1);
+      if (sim.dash > 0 && s.reduced) { // feu atténué : un anneau fixe au lieu des flammes
+        ctx.globalAlpha = 1;
+        ctx.setLineDash([6, 5]);
+        ctx.lineWidth = 3; ctx.strokeStyle = INK;
+        ctx.beginPath(); ctx.arc(px, py, 27, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
+    ctx.globalAlpha = 1;
   }
 }
 

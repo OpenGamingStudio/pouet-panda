@@ -71,6 +71,11 @@ export const SLOWMO_SCALE = 0.4;
 export const DEATH_MAX = 1.6;
 export const END_TAP_GUARD = 0.45; // anti double-tap : pas de « Rejouer » avant ce délai
 
+// Mode assisté (accessibilité) : plus lent et plus doux, sans pénalité (mêmes pièces, même record)
+export const ASSIST_SPEED = 0.75;
+export const ASSIST_GRAVITY = 0.7;
+export const RESUME_COUNTDOWN = 2; // secondes de décompte après une pause
+
 // Sauvegarde
 export const SAVE_KEY = 'pouetpanda.save';
 export const SAVE_VERSION = 1;

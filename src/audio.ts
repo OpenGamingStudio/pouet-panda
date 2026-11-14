@@ -17,6 +17,7 @@ export class Audio {
   private musicGain: GainNode | null = null;
   sound = true;
   music = true;
+  volume = 1; // 0 à 1, réglé par le joueur
   private biome = 'bamboo';
   private timer = 0;
   private beat = 0;
@@ -30,7 +31,7 @@ export class Audio {
       if (!AC) return;
       this.ctx = new AC();
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.5;
+      this.master.gain.value = 0.5 * this.volume;
       this.master.connect(this.ctx.destination);
       this.musicGain = this.ctx.createGain();
       this.musicGain.gain.value = 0.12;
@@ -174,6 +175,7 @@ export class Audio {
 
   /** Coupe/rétablit la musique selon les réglages. */
   apply(): void {
+    if (this.master) this.master.gain.value = 0.5 * this.volume;
     if (this.musicGain) this.musicGain.gain.value = this.music ? 0.12 : 0;
   }
 }

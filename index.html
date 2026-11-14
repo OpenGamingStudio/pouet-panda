@@ -15,40 +15,50 @@
 <script type="module" src="/src/main.ts"></script>
 </head>
 <body class="font-sans">
-<div id="app" class="fixed inset-0 overflow-hidden">
-  <canvas id="stage" class="absolute inset-0 h-full w-full touch-none" aria-label="Plateau de jeu : touche pour péter" role="img"></canvas>
+<main id="app" class="fixed inset-0 overflow-hidden">
+  <canvas id="stage" class="absolute inset-0 h-full w-full touch-none" role="img" aria-label="Plateau de jeu : touche l'écran ou appuie sur Espace pour péter"></canvas>
+
+  <!-- Annonces pour les lecteurs d'écran (score, pièces, biome, fin de partie) -->
+  <div id="live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Partie : score, pièces, pause -->
   <div id="hud" hidden class="pointer-events-none absolute inset-x-0 top-0 flex justify-center pt-[max(0.75rem,env(safe-area-inset-top))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
-  <div class="flex w-[min(100%,calc(100dvh*9/16))] items-start justify-between px-3">
-    <div class="chip" aria-label="Pièces de la partie">
-      <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#FFD60A" stroke="#16110F" stroke-width="3"/><path d="M12 7v10" stroke="#16110F" stroke-width="3" stroke-linecap="round"/></svg>
-      <span id="hud-coins">0</span>
+  <div class="flex w-[min(100%,calc(100dvh*9/16))] flex-col gap-2 px-3">
+    <div class="flex items-start justify-between">
+      <p class="chip">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#FFD60A" stroke="#16110F" stroke-width="3"/><path d="M12 7v10" stroke="#16110F" stroke-width="3" stroke-linecap="round"/></svg>
+        <span class="sr-only">Pièces :</span><span id="hud-coins">0</span>
+      </p>
+      <div class="flex items-center gap-2">
+        <p id="hud-score" class="score text-6xl leading-none"><span id="hud-score-sr" class="sr-only">Score 0</span><span id="hud-score-digits" aria-hidden="true">0</span></p>
+        <svg id="hud-ice" hidden class="h-9 w-9" viewBox="0 0 24 24" role="img" aria-label="Bouclier de glace actif"><circle cx="12" cy="12" r="11" fill="#C8F0FF" stroke="#16110F" stroke-width="2.5"/><path d="M12 4v16M5 8l14 8M19 8L5 16" stroke="#16110F" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <svg id="hud-fire" hidden class="h-9 w-9" viewBox="0 0 24 24" role="img" aria-label="Piment : tu fonces"><circle cx="12" cy="12" r="11" fill="#FFE3B8" stroke="#16110F" stroke-width="2.5"/><path d="M9 6l7 1c1 6-2 10-6 12-2-4-2-9-1-13z" fill="#E8281E" stroke="#16110F" stroke-width="2.2" stroke-linejoin="round"/></svg>
+      </div>
+      <button id="btn-pause" type="button" class="btn btn-sun btn-icon pointer-events-auto" aria-label="Pause" aria-keyshortcuts="Escape P">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M17 4v16" stroke="#16110F" stroke-width="5" stroke-linecap="round"/></svg>
+      </button>
     </div>
-    <div class="flex items-center gap-2">
-      <div id="hud-score" class="score text-6xl leading-none" aria-live="off" aria-label="Score">0</div>
-      <svg id="hud-ice" hidden class="h-9 w-9" viewBox="0 0 24 24" aria-label="Bouclier de glace"><circle cx="12" cy="12" r="11" fill="#C8F0FF" stroke="#16110F" stroke-width="2.5"/><path d="M12 4v16M5 8l14 8M19 8L5 16" stroke="#16110F" stroke-width="2.5" stroke-linecap="round"/></svg>
-      <svg id="hud-fire" hidden class="h-9 w-9" viewBox="0 0 24 24" aria-label="Piment : foncer"><circle cx="12" cy="12" r="11" fill="#FFE3B8" stroke="#16110F" stroke-width="2.5"/><path d="M9 6l7 1c1 6-2 10-6 12-2-4-2-9-1-13z" fill="#E8281E" stroke="#16110F" stroke-width="2.2" stroke-linejoin="round"/></svg>
+    <div class="flex justify-center gap-2">
+      <p class="chip"><span class="sr-only">Biome :</span><span id="hud-biome">Bambouseraie</span></p>
+      <p id="hud-assist" hidden class="chip">Mode assisté</p>
     </div>
-    <button id="btn-pause" type="button" class="btn btn-sun btn-icon pointer-events-auto" aria-label="Pause">
-      <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M17 4v16" stroke="#16110F" stroke-width="5" stroke-linecap="round"/></svg>
-    </button>
   </div>
   </div>
 
-  <div id="banner" hidden role="status" class="pointer-events-none absolute inset-x-0 top-24 flex justify-center px-4"></div>
-  <p id="hint" hidden class="hint-bob pointer-events-none absolute inset-x-0 top-[58%] text-center text-3xl font-bold text-ink">Tape pour péter !</p>
+  <p id="countdown" hidden aria-hidden="true" class="score pointer-events-none absolute inset-x-0 top-[34%] text-center text-9xl leading-none"></p>
+  <div id="banner" hidden aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-36 flex justify-center px-4"></div>
+  <div id="hint-box" hidden class="pointer-events-none absolute inset-x-0 top-[58%] flex justify-center px-4"><p id="hint" class="hint-bob panel px-5 py-2 text-center text-2xl font-bold">Touche l'écran pour péter !</p></div>
 
   <!-- Menu -->
-  <section id="menu" class="absolute inset-0 flex flex-col items-center justify-between px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]" aria-label="Menu">
-    <h1 class="logo -rotate-3 pt-4 text-center text-7xl sm:text-8xl">Pouet<br>Panda</h1>
+  <section id="menu" class="absolute inset-0 flex flex-col items-center justify-between px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]" aria-labelledby="menu-title">
+    <h1 id="menu-title" tabindex="-1" class="logo -rotate-3 pt-4 text-center text-7xl sm:text-8xl">Pouet<br>Panda</h1>
     <div class="flex w-full max-w-sm flex-col items-center gap-4">
       <div class="flex gap-3">
-        <div class="chip">Record <span id="menu-best">0</span></div>
-        <div class="chip">
+        <p class="chip">Record <span id="menu-best">0</span></p>
+        <p class="chip">
           <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#FFD60A" stroke="#16110F" stroke-width="3"/><path d="M12 7v10" stroke="#16110F" stroke-width="3" stroke-linecap="round"/></svg>
-          <span id="menu-coins">0</span>
-        </div>
+          <span class="sr-only">Pièces :</span><span id="menu-coins">0</span>
+        </p>
       </div>
       <button id="btn-play" type="button" class="btn btn-big w-full">Jouer</button>
       <div class="flex w-full gap-3">
@@ -59,24 +69,27 @@
   </section>
 
   <!-- Pause -->
-  <section id="pause" hidden class="absolute inset-0 flex items-center justify-center bg-ink/60 p-5" aria-label="Pause">
+  <section id="pause" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title" class="absolute inset-0 flex items-center justify-center bg-ink/60 p-5">
     <div class="panel pop flex w-full max-w-xs flex-col gap-4 p-6 text-center">
-      <h2 class="text-4xl font-bold">Pause</h2>
+      <h2 id="pause-title" class="text-4xl font-bold">Pause</h2>
       <button id="btn-resume" type="button" class="btn btn-big w-full px-4">Reprendre</button>
+      <button id="btn-pause-settings" type="button" class="btn btn-sun w-full">Réglages</button>
       <button id="btn-pause-menu" type="button" class="btn btn-cream w-full">Menu</button>
     </div>
   </section>
 
   <!-- Fin de partie -->
-  <section id="over" hidden class="absolute inset-0 flex items-center justify-center p-5" aria-label="Fin de partie">
+  <section id="over" hidden role="dialog" aria-modal="true" aria-labelledby="over-title" aria-describedby="over-summary" class="absolute inset-0 flex items-center justify-center p-5">
     <div class="panel pop flex w-full max-w-sm flex-col gap-4 p-6 text-center">
-      <h2 class="text-4xl font-bold">Plof !</h2>
+      <h2 id="over-title" class="text-4xl font-bold">Plof !</h2>
       <p id="over-record" hidden class="mx-auto -rotate-2 rounded-xl border-[3px] border-ink bg-sun px-3 py-1 text-xl font-bold shadow-hard-sm">Nouveau record !</p>
-      <div class="flex items-end justify-center gap-6">
-        <div><div class="text-lg">Score</div><div id="over-score" class="text-7xl font-bold leading-none">0</div></div>
-        <div><div class="text-lg">Record</div><div id="over-best" class="text-4xl font-bold leading-none">0</div></div>
+      <div id="over-summary" class="flex flex-col gap-4">
+        <div class="flex items-end justify-center gap-6">
+          <p><span class="block text-lg">Score</span><span id="over-score" class="block text-7xl font-bold leading-none">0</span></p>
+          <p><span class="block text-lg">Record</span><span id="over-best" class="block text-4xl font-bold leading-none">0</span></p>
+        </div>
+        <p class="text-xl font-bold"><span id="over-coins">+0</span> pièces <span id="over-bonus" class="text-lg font-medium"></span></p>
       </div>
-      <p class="text-xl font-bold"><span id="over-coins">+0</span> pièces <span id="over-bonus" class="text-lg font-medium"></span></p>
       <button id="btn-again" type="button" class="btn btn-big w-full px-4">Rejouer</button>
       <div class="flex gap-3">
         <button id="btn-over-shop" type="button" class="btn btn-sun flex-1">Boutique</button>
@@ -86,33 +99,51 @@
   </section>
 
   <!-- Boutique -->
-  <section id="shop" hidden class="absolute inset-0 flex flex-col bg-sky pt-[max(0.75rem,env(safe-area-inset-top))]" aria-label="Boutique">
+  <section id="shop" hidden class="absolute inset-0 flex flex-col bg-sky pt-[max(0.75rem,env(safe-area-inset-top))]" aria-labelledby="shop-title">
     <header class="flex items-center justify-between gap-3 px-3">
-      <button id="shop-back" type="button" class="btn btn-cream btn-icon" aria-label="Retour">
+      <button id="shop-back" type="button" class="btn btn-cream btn-icon" aria-label="Retour au menu">
         <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4L7 12l8 8" fill="none" stroke="#16110F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <h2 class="text-3xl font-bold">Boutique</h2>
-      <div class="chip">
+      <h2 id="shop-title" tabindex="-1" class="text-3xl font-bold">Boutique</h2>
+      <p class="chip">
         <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#FFD60A" stroke="#16110F" stroke-width="3"/><path d="M12 7v10" stroke="#16110F" stroke-width="3" stroke-linecap="round"/></svg>
-        <span id="shop-coins">0</span>
-      </div>
+        <span class="sr-only">Pièces :</span><span id="shop-coins">0</span>
+      </p>
     </header>
-    <canvas id="preview" class="mx-auto mt-2 h-32 w-full max-w-sm shrink-0 touch-none sm:h-40" aria-label="Aperçu du panda équipé" role="img"></canvas>
-    <div id="tabs" role="tablist" class="mx-auto flex w-full max-w-3xl gap-1 px-3"></div>
+    <canvas id="preview" class="mx-auto mt-2 h-32 w-full max-w-sm shrink-0 touch-none sm:h-40" role="img" aria-label="Aperçu du panda équipé"></canvas>
+    <div id="tabs" role="tablist" aria-label="Catégories de la boutique" class="mx-auto flex w-full max-w-3xl gap-1 px-3"></div>
     <div id="grid" role="tabpanel" class="mx-auto min-h-0 w-full max-w-3xl flex-1 touch-pan-y overflow-y-auto border-t-[3px] border-ink bg-cream p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:border-x-[3px]"></div>
   </section>
 
   <!-- Réglages -->
-  <section id="settings" hidden class="absolute inset-0 flex items-center justify-center overflow-y-auto bg-sky p-5" aria-label="Réglages">
-    <div class="panel pop flex w-full max-w-sm flex-col gap-4 p-6">
+  <section id="settings" hidden class="absolute inset-0 flex justify-center overflow-y-auto bg-sky p-5" aria-labelledby="settings-title">
+    <div class="panel pop m-auto flex w-full max-w-sm flex-col gap-4 p-6">
       <div class="flex items-center justify-between">
-        <h2 class="text-3xl font-bold">Réglages</h2>
-        <button id="settings-back" type="button" class="btn btn-sun btn-icon" aria-label="Retour">
+        <h2 id="settings-title" tabindex="-1" class="text-3xl font-bold">Réglages</h2>
+        <button id="settings-back" type="button" class="btn btn-sun btn-icon" aria-label="Fermer les réglages">
           <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="#16110F" stroke-width="4" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <button id="set-sound" type="button" class="btn btn-cream justify-between" aria-pressed="true"><span>Sons</span><span id="set-sound-v">Oui</span></button>
-      <button id="set-music" type="button" class="btn btn-cream justify-between" aria-pressed="true"><span>Musique</span><span id="set-music-v">Oui</span></button>
+
+      <h3 class="text-xl font-bold">Son</h3>
+      <button id="set-sound" type="button" role="switch" aria-checked="true" class="btn btn-cream justify-between"><span>Effets sonores</span><span id="set-sound-v" aria-hidden="true">Oui</span></button>
+      <button id="set-music" type="button" role="switch" aria-checked="true" class="btn btn-cream justify-between"><span>Musique</span><span id="set-music-v" aria-hidden="true">Oui</span></button>
+      <div class="flex flex-col gap-1">
+        <label for="set-volume" class="flex justify-between text-lg font-bold"><span>Volume</span><span id="set-volume-v" aria-hidden="true">100 %</span></label>
+        <input id="set-volume" type="range" min="0" max="100" step="5" value="100" class="range">
+      </div>
+
+      <h3 class="text-xl font-bold">Jeu</h3>
+      <div class="flex flex-col gap-1">
+        <button id="set-assist" type="button" role="switch" aria-checked="false" aria-describedby="set-assist-help" class="btn btn-cream justify-between"><span>Mode assisté</span><span id="set-assist-v" aria-hidden="true">Non</span></button>
+        <p id="set-assist-help" class="text-base">Le jeu défile plus lentement et le panda tombe plus doucement. Mêmes pièces, même record : aucune pénalité.</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <button id="set-key" type="button" aria-describedby="set-key-help" class="btn btn-cream justify-between"><span>Touche de saut</span><span id="set-key-v">W</span></button>
+        <p id="set-key-help" class="text-base">Espace et la flèche haut marchent toujours. Choisis une touche en plus.</p>
+      </div>
+
+      <h3 class="text-xl font-bold">Affichage</h3>
       <div role="radiogroup" aria-labelledby="motion-label" class="flex flex-col gap-2">
         <span id="motion-label" class="text-lg font-bold">Mouvements réduits</span>
         <div class="flex">
@@ -120,14 +151,17 @@
           <button type="button" role="radio" class="seg" data-motion="yes" aria-checked="false">Oui</button>
           <button type="button" role="radio" class="seg" data-motion="no" aria-checked="false">Non</button>
         </div>
+        <p class="text-base">Pas de secousse ni de clignotement, flammes et glace atténuées. « Auto » suit les réglages du système.</p>
       </div>
+
+      <h3 class="text-xl font-bold">Données</h3>
       <button id="set-reset" type="button" class="btn btn-berry">Effacer ma progression</button>
       <p class="text-center text-base">Pouet Panda, jeu libre (MIT) d'OpenGamingStudio.</p>
     </div>
   </section>
 
-  <div id="toast" hidden role="status" class="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4 pb-[env(safe-area-inset-bottom)]"></div>
-</div>
+  <div id="toast" hidden aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4 pb-[env(safe-area-inset-bottom)]"></div>
+</main>
 <noscript><p class="p-6 text-2xl font-bold">Pouet Panda a besoin de JavaScript pour voler.</p></noscript>
 </body>
 </html>

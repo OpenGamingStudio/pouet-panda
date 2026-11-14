@@ -12,7 +12,7 @@ export interface SaveData {
   games: number;
   owned: string[];
   equipped: Record<Shelf, string>;
-  settings: { sound: boolean; music: boolean; reducedMotion: MotionPref };
+  settings: { sound: boolean; music: boolean; reducedMotion: MotionPref; volume: number; assist: boolean; flapKey: string };
   biomesSeen: BiomeId[];
 }
 
@@ -21,6 +21,9 @@ export interface Store {
   getItem(k: string): string | null;
   setItem(k: string, v: string): void;
 }
+
+/** Touches réservées (pause, navigation) : refusées pour le saut. */
+export const RESERVED_KEYS = ['Escape', 'KeyP', 'Tab', 'Enter', 'Space', 'ArrowUp'];
 
 const BIOMES: BiomeId[] = ['bamboo', 'ice', 'fire', 'swamp', 'storm'];
 
@@ -33,7 +36,7 @@ export function freshSave(): SaveData {
     games: 0,
     owned: Object.values(DEFAULTS),
     equipped: { ...DEFAULTS },
-    settings: { sound: true, music: true, reducedMotion: 'auto' },
+    settings: { sound: true, music: true, reducedMotion: 'auto', volume: 100, assist: false, flapKey: 'KeyW' },
     biomesSeen: ['bamboo'],
   };
 }
@@ -65,6 +68,9 @@ export function sanitize(raw: Record<string, unknown>): SaveData {
   if (st.reducedMotion === 'yes' || st.reducedMotion === 'no' || st.reducedMotion === 'auto') {
     s.settings.reducedMotion = st.reducedMotion;
   }
+  if (typeof st.volume === 'number' && Number.isFinite(st.volume)) s.settings.volume = Math.max(0, Math.min(100, Math.round(st.volume)));
+  if (typeof st.assist === 'boolean') s.settings.assist = st.assist;
+  if (typeof st.flapKey === 'string' && /^[A-Za-z0-9]{1,24}$/.test(st.flapKey) && !RESERVED_KEYS.includes(st.flapKey)) s.settings.flapKey = st.flapKey;
   const seen = Array.isArray(raw.biomesSeen) ? raw.biomesSeen : [];
   for (const b of seen) if (BIOMES.includes(b as BiomeId) && !s.biomesSeen.includes(b as BiomeId)) s.biomesSeen.push(b as BiomeId);
   return s;
