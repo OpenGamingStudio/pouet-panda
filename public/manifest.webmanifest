@@ -1,0 +1,17 @@
+{
+  "name": "Pouet Panda",
+  "short_name": "Pouet Panda",
+  "description": "Un panda vole en pétant entre les bambous. Un appui, un pouet !",
+  "lang": "fr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#FF4F9A",
+  "background_color": "#8FD8FF",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
