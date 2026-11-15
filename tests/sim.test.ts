@@ -77,16 +77,16 @@ describe('physique', () => {
 });
 
 describe('paires', () => {
-  it('l\'ouverture rétrécit de 1 px par point jusqu\'à 135', () => {
+  it('l\'ouverture rétrécit de 1 px par point jusqu\'à 165', () => {
     const s = new Sim(3);
-    expect(s.pairs[0]!.gap).toBe(170);
+    expect(s.pairs[0]!.gap).toBe(210);
     s.score = 0;
     const gaps = s.pairs.map((p) => p.gap);
-    expect(gaps[1]).toBe(169);
-    expect(Math.max(C.GAP_MIN, C.GAP_START - 100)).toBe(135);
+    expect(gaps[1]).toBe(209);
+    expect(Math.max(C.GAP_MIN, C.GAP_START - 100)).toBe(165);
   });
 
-  it('les centres restent dans [140 ; 500] et à ±180 de la précédente', () => {
+  it('les centres restent dans [140 ; 500] et à ±110 de la précédente', () => {
     const s = new Sim(11);
     autoplay(s, 40000);
     for (const p of s.pairs) {
@@ -95,12 +95,12 @@ describe('paires', () => {
     }
   });
 
-  it('la vitesse monte de 2 px/s par point et plafonne à 230', () => {
+  it('la vitesse monte de 1,5 px/s par point et plafonne à 200', () => {
     const s = new Sim(1);
     s.score = 10;
-    expect(s.currentSpeed()).toBe(170);
+    expect(s.currentSpeed()).toBe(C.SPEED_START + 15);
     s.score = 500;
-    expect(s.currentSpeed()).toBe(230);
+    expect(s.currentSpeed()).toBe(C.SPEED_MAX);
   });
 });
 
@@ -175,7 +175,7 @@ describe('Feu', () => {
     p.y = s.y;
     s.step();
     expect(s.dash).toBeGreaterThan(2.4);
-    expect(s.currentSpeed()).toBeCloseTo(Math.min(230, 150 + 62) * 1.6);
+    expect(s.currentSpeed()).toBeCloseTo(Math.min(C.SPEED_MAX, C.SPEED_START + 1.5 * 31) * 1.6);
     // pendant le dash, un mur ne tue pas
     s.y = C.GROUND_Y;
     s.step();
