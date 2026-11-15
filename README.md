@@ -33,6 +33,7 @@ Node ≥ 20.
 npm install
 npm run dev        # serveur de développement
 npm test           # tests (physique, biomes, sauvegarde, boutique)
+npm run build && npm run test:e2e  # accessibilité de bout en bout : axe-core sur menu, jeu, pause, boutique, réglages (Node 22, Chrome via `npx puppeteer browsers install chrome` ou PUPPETEER_EXECUTABLE_PATH)
 npm run build      # vérification des types + build dans dist/
 ```
 

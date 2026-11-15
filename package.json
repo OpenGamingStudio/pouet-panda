@@ -10,10 +10,13 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "node e2e/axe.mjs"
   },
   "devDependencies": {
+    "@axe-core/puppeteer": "^4.14.0",
     "@tailwindcss/vite": "^4.3.5",
+    "puppeteer": "^25.17.0",
     "tailwindcss": "^4.3.5",
     "typescript": "~5.6.3",
     "vite": "^6.4.6",
