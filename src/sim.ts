@@ -116,6 +116,11 @@ export class Sim {
     return localOf(this.score);
   }
 
+  /** Intensité des biomes spéciaux : x0,85 au 1er bloc, +0,05 par bloc, plafonnée à x1,15. */
+  private specialRamp(): number {
+    return C.SPECIAL_RAMP_START + C.SPECIAL_RAMP_STEP * Math.min(blockOf(this.score), C.SPECIAL_RAMP_BLOCKS);
+  }
+
   private gapFor(index: number): number {
     const easy = Math.max(0, 1 - index / C.EASY_POINTS); // 1 au départ, 0 au 8e point
     return Math.max(C.GAP_MIN, C.GAP_START - C.GAP_PER_POINT * index) + Math.round(C.EASY_GAP_BONUS * easy);
@@ -124,7 +129,8 @@ export class Sim {
   private spawn(): void {
     const index = this.nextIndex++;
     const x = index === 0 ? C.FIRST_PAIR_X : this.pairs[this.pairs.length - 1]!.x + C.PAIR_SPACING;
-    const gap = this.gapFor(index);
+    const chained = Math.min(C.CHAIN_MAX, Math.max(0, this.plan.chainOf(index) - 1));
+    const gap = this.gapFor(index) + C.CHAIN_GAP_BONUS * chained;
     const lo = Math.max(C.GAP_CENTER_MIN, this.lastGap - C.GAP_CENTER_MAX_STEP);
     const hi = Math.min(C.GAP_CENTER_MAX, this.lastGap + C.GAP_CENTER_MAX_STEP);
     const baseY = index === 0 ? C.H * 0.45 : lo + this.rng() * (hi - lo);
@@ -203,7 +209,7 @@ export class Sim {
     for (const p of this.pairs) {
       p.x -= dx;
       if (p.moving && this.swampActive()) {
-        p.y = p.baseY + Math.sin((this.time * 2 * Math.PI) / C.SWAMP_MOVE_PERIOD + p.swing) * C.SWAMP_MOVE_AMP;
+        p.y = p.baseY + Math.sin((this.time * 2 * Math.PI) / C.SWAMP_MOVE_PERIOD + p.swing) * C.SWAMP_MOVE_AMP * this.specialRamp();
       }
     }
 
@@ -233,7 +239,7 @@ export class Sim {
     } else {
       const g = (this.swampActive() ? C.SWAMP_GRAVITY : C.GRAVITY) * (this.assist ? C.ASSIST_GRAVITY : 1);
       this.vy += g * dt;
-      if (this.gust && this.gust.warn <= 0 && this.gust.left > 0) this.vy += this.gust.dir * C.GUST_FORCE * dt;
+      if (this.gust && this.gust.warn <= 0 && this.gust.left > 0) this.vy += this.gust.dir * C.GUST_FORCE * this.specialRamp() * dt;
       if (this.vy > C.MAX_FALL) this.vy = C.MAX_FALL;
       this.y += this.vy * dt;
     }
@@ -306,8 +312,10 @@ export class Sim {
     if (this.score % C.BIOME_BLOCK === 0) {
       // fin d'un biome : bonus s'il était spécial et survécu
       if (this.plan.idOf(before) !== 'bamboo') {
-        this.coins += C.COIN_BONUS_BIOME;
-        this.emit({ t: 'bonus', coins: C.COIN_BONUS_BIOME });
+        const chained = Math.min(C.CHAIN_MAX, this.plan.chainOf(before) - 1);
+        const bonus = C.COIN_BONUS_BIOME + C.CHAIN_COIN_BONUS * chained;
+        this.coins += bonus;
+        this.emit({ t: 'bonus', coins: bonus });
       }
       this.lastBiome = id;
       this.enterBiome(id);

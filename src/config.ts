@@ -41,6 +41,14 @@ export const EASY_POINTS = 8; // les 8 premiers points sont un peu plus doux
 export const EASY_GAP_BONUS = 20;
 export const EASY_SPEED_MALUS = 15;
 export const SPECIAL_ORDER = ['ice', 'fire', 'swamp', 'storm'] as const;
+// Courbe des biomes spéciaux (le tirage reste libre) : l'intensité (amplitude du marais, force des rafales)
+// monte avec le rang du bloc, et chaque spécial enchaîné après un autre adoucit les ouvertures et rapporte plus.
+export const SPECIAL_RAMP_START = 0.85;
+export const SPECIAL_RAMP_STEP = 0.05;
+export const SPECIAL_RAMP_BLOCKS = 6; // plafond : x1,15
+export const CHAIN_GAP_BONUS = 8; // par spécial enchaîné (au-delà du 1er)
+export const CHAIN_MAX = 2;
+export const CHAIN_COIN_BONUS = 2; // pièces en plus par spécial enchaîné survécu
 export const BANNER_TIME = 1.5;
 export const FADE_TIME = 0.5;
 
