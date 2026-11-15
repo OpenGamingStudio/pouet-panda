@@ -1,5 +1,5 @@
 import * as C from './config';
-import { biomeIdOf, blockOf, localOf, type BiomeId } from './biomes';
+import { BiomePlan, blockOf, localOf, type BiomeId } from './biomes';
 import { makeRng, type Rng } from './rng';
 
 export type Phase = 'ready' | 'playing' | 'dying' | 'dead';
@@ -40,6 +40,7 @@ export interface Gust {
 export class Sim {
   phase: Phase = 'ready';
   rng: Rng;
+  plan: BiomePlan;
   time = 0; // temps de jeu (pas de partie en cours : sert aux animations)
   y = C.H * 0.45;
   prevY = C.H * 0.45;
@@ -70,6 +71,7 @@ export class Sim {
 
   constructor(seed: number) {
     this.rng = makeRng(seed);
+    this.plan = new BiomePlan(seed);
     this.reset();
   }
 
@@ -106,7 +108,7 @@ export class Sim {
   }
 
   get biome(): BiomeId {
-    return biomeIdOf(this.score);
+    return this.plan.idOf(this.score);
   }
 
   /** Rang du score courant dans son biome (0 = vient d'arriver). */
@@ -127,7 +129,7 @@ export class Sim {
     const hi = Math.min(C.GAP_CENTER_MAX, this.lastGap + C.GAP_CENTER_MAX_STEP);
     const baseY = index === 0 ? C.H * 0.45 : lo + this.rng() * (hi - lo);
     this.lastGap = baseY;
-    const id = biomeIdOf(index);
+    const id = this.plan.idOf(index);
     const local = localOf(index);
     const moving = id === 'swamp' && local >= 1 && local % 2 === 1;
     const coin = index % 2 === 1 ? { y: baseY + (this.rng() * 2 - 1) * C.COIN_OFFSET, taken: false } : null;
@@ -300,10 +302,10 @@ export class Sim {
     const before = this.score;
     this.score++;
     this.emit({ t: 'score', score: this.score });
-    const id = biomeIdOf(this.score);
+    const id = this.plan.idOf(this.score);
     if (this.score % C.BIOME_BLOCK === 0) {
       // fin d'un biome : bonus s'il était spécial et survécu
-      if (biomeIdOf(before) !== 'bamboo') {
+      if (this.plan.idOf(before) !== 'bamboo') {
         this.coins += C.COIN_BONUS_BIOME;
         this.emit({ t: 'bonus', coins: C.COIN_BONUS_BIOME });
       }

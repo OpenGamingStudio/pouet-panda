@@ -1,4 +1,5 @@
 import { BIOME_BLOCK, SPECIAL_ORDER } from './config';
+import { makeRng, type Rng } from './rng';
 
 export type BiomeId = 'bamboo' | (typeof SPECIAL_ORDER)[number];
 
@@ -52,18 +53,40 @@ export function localOf(score: number): number {
   return score - blockOf(score) * BIOME_BLOCK;
 }
 
-export function biomeIdOf(score: number): BiomeId {
-  const b = blockOf(score);
-  if (b % 2 === 0) return 'bamboo';
-  return SPECIAL_ORDER[((b - 1) / 2) % SPECIAL_ORDER.length]!;
-}
+const ALL_BIOMES: BiomeId[] = ['bamboo', ...SPECIAL_ORDER];
 
-export function biomeOf(score: number): BiomeInfo {
-  const id = biomeIdOf(score);
-  if (id !== 'bamboo') return SPECIALS[id];
-  const light = BAMBOO_LIGHTS[(blockOf(score) / 2) % BAMBOO_LIGHTS.length]!;
-  return {
-    id: 'bamboo', name: 'Bambouseraie', special: false, rule: '',
-    sky: light.sky, bamboo: '#9BCB3C', far: light.far, mid: light.mid, ground: light.ground, groundTop: light.groundTop,
-  };
+/** Suite de biomes d'une partie : bambou pour le 1er bloc, puis tirage au hasard sans jamais répéter le précédent. */
+export class BiomePlan {
+  private blocks: BiomeId[] = ['bamboo'];
+  private rng: Rng;
+
+  constructor(seed: number) {
+    this.rng = makeRng((seed ^ 0x9e3779b9) >>> 0);
+  }
+
+  idOf(score: number): BiomeId {
+    const b = blockOf(score);
+    while (this.blocks.length <= b) {
+      const prev = this.blocks[this.blocks.length - 1]!;
+      const pool = ALL_BIOMES.filter((id) => id !== prev);
+      this.blocks.push(pool[Math.floor(this.rng() * pool.length)]!);
+    }
+    return this.blocks[b]!;
+  }
+
+  /** Impose le biome d'un bloc (tests). */
+  force(score: number, id: BiomeId): void {
+    this.idOf(score);
+    this.blocks[blockOf(score)] = id;
+  }
+
+  infoOf(score: number): BiomeInfo {
+    const id = this.idOf(score);
+    if (id !== 'bamboo') return SPECIALS[id];
+    const light = BAMBOO_LIGHTS[blockOf(score) % BAMBOO_LIGHTS.length]!;
+    return {
+      id: 'bamboo', name: 'Bambouseraie', special: false, rule: '',
+      sky: light.sky, bamboo: '#9BCB3C', far: light.far, mid: light.mid, ground: light.ground, groundTop: light.groundTop,
+    };
+  }
 }
