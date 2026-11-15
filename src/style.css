@@ -101,7 +101,7 @@ body {
     letter-spacing: 0.01em;
   }
   .tab {
-    @apply min-h-11 flex-1 rounded-t-2xl border-[3px] border-b-0 border-ink bg-sand px-1 text-base sm:min-h-12 sm:text-lg font-bold;
+    @apply min-h-11 min-w-11 flex-1 rounded-t-2xl border-[3px] border-b-0 border-ink bg-sand px-1 text-base sm:min-h-12 sm:text-lg font-bold;
   }
   .tab[aria-selected="true"] {
     @apply bg-sun;
