@@ -377,7 +377,6 @@ function finishGame(): void {
     ...(res.dailyJustDone ? ['Défi du jour réussi !'] : []),
   ];
   $('over-goals').textContent = news.join(' · ');
-  $('over-goals').hidden = news.length === 0;
   persist();
   $('over-score').textContent = String(sim.score);
   $('over-best').textContent = String(d.best);
