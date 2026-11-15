@@ -12,8 +12,9 @@ Le test sur appareil réel reste à faire (checklist plus bas).
 
 ## Méthode rejouable
 
-- `docs/audit-mobile/scripts/audit.mjs DIST OUT` : mesure toutes les cibles interactives visibles de chaque écran (menu, boutique, réglages, partie, pause), le défilement horizontal et les débordements, prend des captures.
-- `docs/audit-mobile/scripts/ax.mjs DIST` : affiche l'arbre d'accessibilité de chaque écran.
+- Préparer : `npm i --no-save puppeteer-core` (Chrome local, chemin dans `CHROME_PATH`, défaut `/usr/bin/google-chrome`), après `npm run build`.
+- `node docs/audit-mobile/scripts/audit.mjs dist out` : mesure toutes les cibles interactives visibles de chaque écran (menu, boutique, réglages, partie, pause), le défilement horizontal et les éléments coupés (à gauche, à droite, en haut ou en bas, sauf si un parent défile), prend des captures. Les serveurs des scripts n'écoutent que sur 127.0.0.1 et refusent tout chemin hors de `dist`.
+- `node docs/audit-mobile/scripts/ax.mjs dist` : affiche l'arbre d'accessibilité de chaque écran.
 - Tailles : mobile 320×568 (tactile, ×2), zoom 200 % (640×360 CSS, équivalent d'un 1280×720 zoomé à 200 %), zoom 400 % (320×180, critère de reflow WCAG 1.4.10).
 
 ## Résultats
@@ -22,14 +23,16 @@ Le test sur appareil réel reste à faire (checklist plus bas).
 |---|---|
 | Cibles ≥ 44×44 px (menu, boutique, réglages, partie, pause ; 320 px, 200 %, 400 %) | OK : 0 bouton, onglet, interrupteur, radio ou curseur sous 44 px. Les seules mesures plus petites sont les titres `h2` (focus programmatique, pas une cible) |
 | `user-scalable=no` / `maximum-scale` | Absents : viewport `width=device-width, initial-scale=1, viewport-fit=cover`. Rien à corriger |
-| Défilement horizontal, éléments coupés | Aucun, sur les 3 tailles et les 5 écrans (reflow 320 px OK) |
+| Défilement horizontal | Aucun (reflow 320 px OK) |
+| Éléments coupés, 320 px | Aucun sur les 5 écrans |
+| Éléments coupés, zoom 200 % et 400 % | **ÉCHEC (WCAG 1.4.10 reflow)** : le menu n'est pas défilable (`#app` fixed, overflow-hidden) ; à 200 % Boutique et Réglages sont sous le bas de l'écran (`zoom200-menu.png`) ; à 400 % titre, Jouer, Boutique et Réglages sont coupés, les onglets de la boutique et le bouton Menu de la pause aussi. Renvoyé à PR1 « menu qui défile » (pause 400 % à revoir avec). Boutique et Réglages défilent (overflow-y-auto) à 200 % ; au 400 %, seuls les onglets de la boutique sont coupés |
 | Zone de sécurité (encoche) | `env(safe-area-inset-*)` utilisé dans le HUD |
 | Noms accessibles | Tous les boutons ont un nom (« Retour au menu », « Fermer les réglages », « Essayer : Panda roux », « Il manque 60 »...) |
 | Rôles et états | `switch` avec `checked`, `radiogroup` Auto/Oui/Non, `slider` avec valeur, `tablist` de la boutique, `dialog` pour la pause |
 | Annonces | Région `status` (aria-live polite) : « Partie prête… », score, pièces, biome |
 | Textes dans le HUD | Score et pièces ont un équivalent `sr-only`, les chiffres décoratifs sont `aria-hidden` |
 
-Captures dans `docs/audit-mobile/` : `320-*.png` (menu, boutique, réglages, pause), `zoom200-*.png`, `zoom400-reglages.png`.
+Captures dans `docs/audit-mobile/` : `320-*.png`, `zoom200-*.png`, `zoom400-*.png` (menu, boutique, réglages, pause).
 
 ## Risques non levés (à tester sur appareil)
 
@@ -47,4 +50,4 @@ Captures dans `docs/audit-mobile/` : `320-*.png` (menu, boutique, réglages, pau
 
 ## Corrections de code dans cette PR
 
-Aucune : les contrôles mesurables sont conformes. Seule `ACCESSIBILITY.md` garde la mention « Non couvert » jusqu'au test réel.
+Aucune dans cette PR (doc seule) : les cibles et le 320 px sont conformes, l'échec du zoom 200 % / 400 % est à corriger par PR1. Seule `ACCESSIBILITY.md` garde la mention « Non couvert » jusqu'au test réel.

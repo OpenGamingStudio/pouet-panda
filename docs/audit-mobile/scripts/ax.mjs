@@ -1,8 +1,14 @@
-import puppeteer from '/root/.npm/_npx/8003d8991b0d346b/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
+import puppeteer from 'puppeteer-core';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const dist=process.argv[2];const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.woff2':'font/woff2','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
-const srv=http.createServer((q,r)=>{let f=path.join(dist,q.url==='/'?'index.html':q.url.split('?')[0]);if(!fs.existsSync(f)){r.statusCode=404;return r.end()}r.setHeader('content-type',mime[path.extname(f)]||'x');r.end(fs.readFileSync(f))}).listen(8232);
-const b=await puppeteer.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.woff2':'font/woff2','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json','.ico':'image/x-icon'};
+const serve=(dist,port)=>{const root=path.resolve(dist);return http.createServer((q,r)=>{
+  let u;try{u=decodeURIComponent(q.url.split('?')[0])}catch{r.statusCode=400;return r.end()}
+  const f=path.resolve(root,'.'+(u==='/'?'/index.html':u));
+  if(f!==root&&!f.startsWith(root+path.sep)){r.statusCode=403;return r.end()}
+  if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.statusCode=404;return r.end()}
+  r.setHeader('content-type',mime[path.extname(f)]||'application/octet-stream');r.end(fs.readFileSync(f))}).listen(port,'127.0.0.1')};
+const dist=process.argv[2];const srv=serve(dist,8232);
+const b=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--no-sandbox']});
 const p=await b.newPage();await p.setViewport({width:320,height:568,isMobile:true,hasTouch:true});
 await p.goto('http://127.0.0.1:8232/');const sl=ms=>new Promise(r=>setTimeout(r,ms));await sl(500);
 const flat=(n,d=0,o=[])=>{if(!n)return o;if(!['generic','none','StaticText','InlineTextBox'].includes(n.role)||n.role==='StaticText')o.push('  '.repeat(d)+n.role+': '+(n.name||'')+(n.checked!==undefined?' [checked='+n.checked+']':'')+(n.value!==undefined?' [value='+n.value+']':''));(n.children||[]).forEach(c=>flat(c,d+1,o));return o};
