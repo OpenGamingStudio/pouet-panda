@@ -762,6 +762,9 @@ window.addEventListener('resize', resize);
 resize();
 
 let last = performance.now();
+let lastMenuDraw = 0;
+/** Le décor du menu (animation d'attente) est dessiné à ~30 i/s : moitié moins de travail pour le fil principal. */
+const MENU_FRAME_MS = 30;
 function frame(now: number): void {
   const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
@@ -788,7 +791,8 @@ function frame(now: number): void {
   if (screen === 'shop') {
     drawPreview(dt);
     // le plateau n'est pas dessiné derrière la boutique
-  } else if (screen !== 'settings' && screen !== 'goals') {
+  } else if (screen !== 'settings' && screen !== 'goals' && (screen !== 'menu' || now - lastMenuDraw >= MENU_FRAME_MS)) {
+    if (screen === 'menu') lastMenuDraw = now;
     drawScene(ctx, view, {
       sim, look: look(), biome: shown, biomeId: shownId, fx, alpha, reduced: reduced(), shake,
       scrollIdle: idleScroll, showPanda: true,
