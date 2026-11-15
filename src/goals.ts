@@ -42,9 +42,10 @@ export const CHALLENGES: Challenge[] = [
   { id: 'score25', desc: 'Atteins 25 de score en une partie.', test: (r) => r.score >= 25 },
   { id: 'coins8', desc: 'Ramasse 8 pièces en une partie.', test: (r) => r.coins >= 8 },
   { id: 'coins15', desc: 'Ramasse 15 pièces en une partie.', test: (r) => r.coins >= 15 },
-  { id: 'ice', desc: 'Traverse le biome Glace.', test: (r) => r.biomes.includes('ice') },
+  { id: 'ice', desc: 'Entre dans le biome Glace.', test: (r) => r.biomes.includes('ice') },
   { id: 'fire', desc: 'Entre dans le biome Feu.', test: (r) => r.biomes.includes('fire') },
   { id: 'swamp', desc: 'Entre dans le biome Marais.', test: (r) => r.biomes.includes('swamp') },
+  { id: 'storm', desc: 'Entre dans le biome Orage.', test: (r) => r.biomes.includes('storm') },
 ];
 
 export interface DailyState {

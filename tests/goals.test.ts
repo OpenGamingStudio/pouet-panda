@@ -28,6 +28,13 @@ describe('défis et succès', () => {
     expect(d.daily.done).toBe(false);
   });
 
+  it('défis Glace et Orage : validés en entrant dans le biome', () => {
+    const run = (b: string[]) => ({ score: 1, coins: 0, biomes: b as never });
+    expect(CHALLENGES.find((c) => c.id === 'storm')?.test(run(['bamboo', 'storm']))).toBe(true);
+    expect(CHALLENGES.find((c) => c.id === 'storm')?.test(run(['bamboo']))).toBe(false);
+    expect(CHALLENGES.find((c) => c.id === 'ice')?.desc).toMatch(/^Entre dans/);
+  });
+
   it('succès obtenus une seule fois', () => {
     const d = freshSave();
     d.games = 1;
