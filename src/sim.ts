@@ -116,9 +116,9 @@ export class Sim {
     return localOf(this.score);
   }
 
-  /** Intensité des biomes spéciaux : x0,85 au 1er bloc, +0,05 par bloc, plafonnée à x1,15. */
+  /** Intensité des biomes spéciaux : x0,85 au 1er bloc spécial (2e bloc, le 1er étant la Bambouseraie), +0,05 par bloc, plafonnée à x1,15. */
   private specialRamp(): number {
-    return C.SPECIAL_RAMP_START + C.SPECIAL_RAMP_STEP * Math.min(blockOf(this.score), C.SPECIAL_RAMP_BLOCKS);
+    return C.SPECIAL_RAMP_START + C.SPECIAL_RAMP_STEP * Math.min(Math.max(0, blockOf(this.score) - 1), C.SPECIAL_RAMP_BLOCKS);
   }
 
   private gapFor(index: number): number {

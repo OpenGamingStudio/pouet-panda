@@ -45,7 +45,7 @@ export const SPECIAL_ORDER = ['ice', 'fire', 'swamp', 'storm'] as const;
 // monte avec le rang du bloc, et chaque spécial enchaîné après un autre adoucit les ouvertures et rapporte plus.
 export const SPECIAL_RAMP_START = 0.85;
 export const SPECIAL_RAMP_STEP = 0.05;
-export const SPECIAL_RAMP_BLOCKS = 6; // plafond : x1,15
+export const SPECIAL_RAMP_BLOCKS = 6; // plafond : x1,15 (6 paliers après le 1er bloc spécial)
 export const CHAIN_GAP_BONUS = 8; // par spécial enchaîné (au-delà du 1er)
 export const CHAIN_MAX = 2;
 export const CHAIN_COIN_BONUS = 2; // pièces en plus par spécial enchaîné survécu
