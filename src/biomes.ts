@@ -74,6 +74,13 @@ export class BiomePlan {
     return this.blocks[b]!;
   }
 
+  /** Nombre de biomes spéciaux d'affilée jusqu'au bloc du score, lui compris (0 en Bambouseraie). */
+  chainOf(score: number): number {
+    let n = 0;
+    for (let b = blockOf(score); b >= 0 && this.idOf(b * BIOME_BLOCK) !== 'bamboo'; b--) n++;
+    return n;
+  }
+
   /** Impose le biome d'un bloc (tests). */
   force(score: number, id: BiomeId): void {
     this.idOf(score);

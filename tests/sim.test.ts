@@ -120,6 +120,22 @@ describe('score, biomes et pièces', () => {
     expect(seen.slice(0, 2)).toEqual(['ice@8', 'bamboo@16']);
   });
 
+  it('bonus de fin de biome : +2 pièces par spécial enchaîné (plafonné), sans changer le tirage', () => {
+    const bonus = (prev: 'bamboo' | 'ice', cur: 'ice' | 'fire' | 'storm'): number => {
+      const s = new Sim(3);
+      s.plan.force(0, 'bamboo');
+      s.plan.force(8, prev);
+      s.plan.force(16, cur);
+      s.plan.force(24, 'bamboo');
+      s.score = 23;
+      s.coins = 0;
+      (s as unknown as { addPoint(): void }).addPoint();
+      return s.coins;
+    };
+    expect(bonus('bamboo', 'ice')).toBe(C.COIN_BONUS_BIOME);
+    expect(bonus('ice', 'fire')).toBe(C.COIN_BONUS_BIOME + C.CHAIN_COIN_BONUS);
+  });
+
   it('le bonus de record n\'est donné que si un record existait', () => {
     const s = new Sim(1);
     s.score = 12;

@@ -31,4 +31,14 @@ describe('biomes', () => {
     expect(localOf(25)).toBe(1);
     expect(localOf(31)).toBe(7);
   });
+  it('chaîne de spéciaux : 0 en bambou, 1 puis 2, 3… quand ils s\'enchaînent', () => {
+    const p = new BiomePlan(1);
+    p.force(0, 'bamboo');
+    p.force(8, 'ice');
+    p.force(16, 'fire');
+    p.force(24, 'bamboo');
+    p.force(32, 'storm');
+    expect([0, 8, 16, 24, 32].map((s) => p.chainOf(s))).toEqual([0, 1, 2, 0, 1]);
+    expect(p.chainOf(19)).toBe(2);
+  });
 });
