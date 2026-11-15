@@ -71,7 +71,7 @@
 
   <!-- Pause -->
   <section id="pause" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title" class="absolute inset-0 flex items-center justify-center bg-ink/60 p-5">
-    <div class="panel pop flex w-full max-w-xs flex-col gap-4 p-6 text-center">
+    <div class="panel pop flex w-full max-w-xs flex-col gap-4 p-4 text-center min-[360px]:p-6">
       <h2 id="pause-title" class="text-4xl font-bold">Pause</h2>
       <button id="btn-resume" type="button" class="btn btn-big w-full px-4">Reprendre</button>
       <button id="btn-pause-settings" type="button" class="btn btn-sun w-full">Réglages</button>
@@ -102,7 +102,7 @@
 
   <!-- Boutique -->
   <section id="shop" hidden class="absolute inset-0 flex flex-col overflow-y-auto bg-sky pt-[max(0.75rem,env(safe-area-inset-top))]" aria-labelledby="shop-title">
-    <header class="flex items-center justify-between gap-3 px-3">
+    <header class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3">
       <button id="shop-back" type="button" class="btn btn-cream btn-icon" aria-label="Retour au menu">
         <svg class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4L7 12l8 8" fill="none" stroke="#16110F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -118,8 +118,8 @@
   </section>
 
   <!-- Défis et succès -->
-  <section id="goals" hidden class="absolute inset-0 flex justify-center overflow-y-auto bg-sky p-5" aria-labelledby="goals-title">
-    <div class="panel pop m-auto flex w-full max-w-sm flex-col gap-4 p-6">
+  <section id="goals" hidden class="absolute inset-0 flex justify-center overflow-y-auto bg-sky p-3 min-[360px]:p-5" aria-labelledby="goals-title">
+    <div class="panel pop m-auto flex w-full max-w-sm flex-col gap-4 p-4 min-[360px]:p-6">
       <div class="flex items-center justify-between">
         <h2 id="goals-title" tabindex="-1" class="text-3xl font-bold">Défis</h2>
         <button id="goals-back" type="button" class="btn btn-sun btn-icon" aria-label="Fermer les défis">
@@ -134,8 +134,8 @@
   </section>
 
   <!-- Réglages -->
-  <section id="settings" hidden class="absolute inset-0 flex justify-center overflow-y-auto bg-sky p-5" aria-labelledby="settings-title">
-    <div class="panel pop m-auto flex w-full max-w-sm flex-col gap-4 p-6">
+  <section id="settings" hidden class="absolute inset-0 flex justify-center overflow-y-auto bg-sky p-3 min-[360px]:p-5" aria-labelledby="settings-title">
+    <div class="panel pop m-auto flex w-full max-w-sm flex-col gap-4 p-4 min-[360px]:p-6">
       <div class="flex items-center justify-between">
         <h2 id="settings-title" tabindex="-1" class="text-3xl font-bold">Réglages</h2>
         <button id="settings-back" type="button" class="btn btn-sun btn-icon" aria-label="Fermer les réglages">

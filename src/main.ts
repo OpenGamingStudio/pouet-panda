@@ -441,7 +441,7 @@ function renderShop(focusKey?: string): void {
   const grid = $('grid');
   grid.setAttribute('aria-labelledby', `tab-${shelf}`);
   grid.replaceChildren();
-  const list = el('ul', 'grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4');
+  const list = el('ul', 'grid grid-cols-1 gap-2 min-[260px]:grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4');
   for (const item of itemsOf(shelf)) list.append(card(item));
   grid.append(list);
   const names = (Object.keys(tryOn) as Shelf[]).map((k) => itemById(tryOn[k])?.name ?? '').join(', ');
