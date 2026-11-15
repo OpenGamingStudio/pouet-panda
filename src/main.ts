@@ -4,6 +4,7 @@ import { SPECIALS, type BiomeId } from './biomes';
 import { Audio } from './audio';
 import { blendBiome, drawPanda, drawScene, Fx, makeView, INK, type Look, type View } from './render';
 import { ACHIEVEMENTS, challengeById, dayKey, evaluate, rollDaily } from './goals';
+import { buzz, canVibrate } from './haptics';
 import { freshSave, load, RESERVED_KEYS, write, type Loaded, type MotionPref, type Store } from './save';
 import { buy, equip, itemById, itemsOf, SHELVES, type Item, type Shelf } from './shop';
 import { Clock, Sim } from './sim';
@@ -128,6 +129,8 @@ function applySettings(): void {
   $('set-music-v').textContent = s.music ? 'Oui' : 'Non';
   $('set-assist').setAttribute('aria-checked', String(s.assist));
   $('set-assist-v').textContent = s.assist ? 'Oui' : 'Non';
+  $('set-haptics').setAttribute('aria-checked', String(s.haptics));
+  $('set-haptics-v').textContent = s.haptics ? 'Oui' : 'Non';
   $<HTMLInputElement>('set-volume').value = String(s.volume);
   $('set-volume-v').textContent = `${s.volume} %`;
   if (!capturing) $('set-key-v').textContent = keyLabel(s.flapKey);
@@ -318,6 +321,7 @@ function handleEvents(): void {
         break;
       case 'ice':
         audio.ice();
+        buzz('shield', saved.data.settings.haptics, reduced());
         setHidden('hud-ice', true);
         shake = reduced() ? 0 : 5;
         announce('Choc absorbé par la glace');
@@ -333,6 +337,7 @@ function handleEvents(): void {
         break;
       case 'die':
         audio.die();
+        buzz('die', saved.data.settings.haptics, reduced());
         shake = reduced() ? 0 : 7;
         announce(`Plof ! Score ${sim.score}`);
         setHidden('hud-ice', true);
@@ -675,6 +680,12 @@ $('set-music').addEventListener('click', () => {
   persist();
   applySettings();
 });
+$('set-haptics').addEventListener('click', () => {
+  saved.data.settings.haptics = !saved.data.settings.haptics;
+  persist();
+  applySettings();
+  buzz('shield', saved.data.settings.haptics, reduced());
+});
 $('set-assist').addEventListener('click', () => {
   saved.data.settings.assist = !saved.data.settings.assist;
   persist();
@@ -802,6 +813,7 @@ function frame(now: number): void {
   requestAnimationFrame(frame);
 }
 
+setHidden('set-haptics-box', !canVibrate());
 applySettings();
 refreshMenu();
 if (!saved.persistent) toast('Progression non sauvegardée');
