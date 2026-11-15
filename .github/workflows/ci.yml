@@ -31,3 +31,30 @@ jobs:
       # --ignore-scripts bloque le téléchargement automatique de Chrome : explicite ici
       - run: npx puppeteer browsers install chrome
       - run: npm run test:e2e
+
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      # Image de production (nginx) : c'est elle que le test hors ligne doit vérifier
+      - run: docker build -t pouet-panda .
+      - run: docker run -d --name pp -p 8080:80 pouet-panda
+      - name: Attendre nginx
+        run: timeout 30 sh -c 'until curl -fs http://localhost:8080/ >/dev/null; do sleep 1; done'
+      - name: Test hors ligne (Chrome de l'image du runner)
+        env:
+          CHROME: /usr/bin/google-chrome
+          # change la version du worker dans le conteneur pour tester la purge des anciens caches
+          SWCHANGE: docker exec pp sed -i -E 's/pouet-panda-[0-9a-f]{10}/pouet-panda-0123456789/' /usr/share/nginx/html/sw.js
+        run: npm run test:offline -- http://localhost:8080/
+      - name: Journaux nginx (échec)
+        if: failure()
+        run: docker logs pp
