@@ -178,17 +178,31 @@ export function drawHat(ctx: CanvasRenderingContext2D, hat: string): void {
 }
 
 /** Dessine le panda centré en (x, y), taille ≈ 44 px. */
-export function drawPanda(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, look: Look, scale = 1): void {
+export function drawPanda(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, look: Look, scale = 1, pose?: { t: number; vy: number }): void {
   const f = FURS[look.fur] ?? FURS['fur.classic']!;
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
   ctx.scale(scale, scale);
+  // animation : étirement selon la vitesse, bras qui battent, oreilles et jambes qui suivent, clignement
+  let arm = 0;
+  let ear = 0;
+  let leg = 0;
+  let blink = false;
+  if (pose) {
+    const up = Math.max(-1, Math.min(1, -pose.vy / 500)); // +1 : monte vite, -1 : tombe vite
+    const flutter = Math.sin(pose.t * 22) * 0.35 * Math.max(0, up);
+    ctx.scale(1 - 0.08 * up, 1 + 0.12 * up);
+    arm = -up * 0.9 + flutter; // bras levés en montant, relevés en tombant
+    ear = -up * 0.35 + Math.sin(pose.t * 5) * 0.06;
+    leg = Math.sin(pose.t * 9) * 2 - up * 2;
+    blink = pose.t % 3.2 < 0.12;
+  }
   // oreilles, jambes, corps, bras, tête
-  ell(ctx, -14, -19, 7, 7, f.patch);
-  ell(ctx, 14, -19, 7, 7, f.patch);
-  ell(ctx, -10, 17, 6, 5, f.patch);
-  ell(ctx, 10, 17, 6, 5, f.patch);
+  ell(ctx, -14, -19 + ear * 4, 7, 7, f.patch);
+  ell(ctx, 14, -19 + ear * 4, 7, 7, f.patch);
+  ell(ctx, -10, 17 + leg, 6, 5, f.patch);
+  ell(ctx, 10, 17 - leg, 6, 5, f.patch);
   ell(ctx, 0, 6, 17, 14, f.body);
   if (f.bands) {
     ctx.save();
@@ -198,13 +212,20 @@ export function drawPanda(ctx: CanvasRenderingContext2D, x: number, y: number, a
     ctx.lineWidth = 2.5; ctx.strokeStyle = INK;
     ctx.beginPath(); ctx.ellipse(0, 6, 17, 14, 0, 0, Math.PI * 2); ctx.stroke();
   }
-  ell(ctx, -17, 5, 5, 8, f.patch, 0.3);
-  ell(ctx, 17, 5, 5, 8, f.patch, -0.3);
+  ell(ctx, -17, 5, 5, 8, f.patch, 0.3 + arm);
+  ell(ctx, 17, 5, 5, 8, f.patch, -0.3 - arm);
   ell(ctx, 0, -5, 18, 16, f.face);
   ell(ctx, -8, -4, 5, 6.5, f.patch, 0.45, 0);
   ell(ctx, 8, -4, 5, 6.5, f.patch, -0.45, 0);
-  ell(ctx, -7.5, -5, 2, 2.4, '#FFFFFF', 0, 0);
-  ell(ctx, 8.5, -5, 2, 2.4, '#FFFFFF', 0, 0);
+  if (blink) {
+    ell(ctx, -8, -4, 5, 6.5, f.face, 0.45, 0);
+    ell(ctx, 8, -4, 5, 6.5, f.face, -0.45, 0);
+    ctx.lineWidth = 2; ctx.strokeStyle = INK;
+    ctx.beginPath(); ctx.moveTo(-12, -4); ctx.lineTo(-4, -4); ctx.moveTo(4, -4); ctx.lineTo(12, -4); ctx.stroke();
+  } else {
+    ell(ctx, -7.5, -5, 2, 2.4, '#FFFFFF', 0, 0);
+    ell(ctx, 8.5, -5, 2, 2.4, '#FFFFFF', 0, 0);
+  }
   ell(ctx, 0, 1, 3.2, 2.4, INK, 0, 0);
   ctx.lineWidth = 1.8; ctx.strokeStyle = INK;
   ctx.beginPath(); ctx.arc(0, 3, 4, 0.2, Math.PI - 0.2); ctx.stroke();
@@ -457,7 +478,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: View, s: Scene): voi
         ctx.lineWidth = 1.5; ctx.strokeStyle = INK;
         ctx.beginPath(); ctx.arc(px, py, 31, 0, Math.PI * 2); ctx.stroke();
       }
-      drawPanda(ctx, px, py, sim.angle, s.look, s.pandaScale ?? 1);
+      drawPanda(ctx, px, py, sim.angle, s.look, s.pandaScale ?? 1, s.reduced ? undefined : { t: sim.time, vy: sim.vy });
       if (sim.dash > 0 && s.reduced) { // feu atténué : un anneau fixe au lieu des flammes
         ctx.globalAlpha = 1;
         ctx.setLineDash([6, 5]);

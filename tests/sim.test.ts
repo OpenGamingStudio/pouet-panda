@@ -79,10 +79,10 @@ describe('physique', () => {
 describe('paires', () => {
   it('l\'ouverture rétrécit de 1 px par point jusqu\'à 165', () => {
     const s = new Sim(3);
-    expect(s.pairs[0]!.gap).toBe(210);
+    expect(s.pairs[0]!.gap).toBe(C.GAP_START + C.EASY_GAP_BONUS);
     s.score = 0;
     const gaps = s.pairs.map((p) => p.gap);
-    expect(gaps[1]).toBe(209);
+    expect(gaps[1]).toBe(C.GAP_START + Math.round(C.EASY_GAP_BONUS * (1 - 1 / C.EASY_POINTS)) - 1);
     expect(Math.max(C.GAP_MIN, C.GAP_START - 100)).toBe(165);
   });
 
@@ -105,17 +105,17 @@ describe('paires', () => {
 });
 
 describe('score, biomes et pièces', () => {
-  it('l\'autopilote marque des points et le biome change à 10 et à 20', () => {
+  it('l\'autopilote marque des points et le biome change à 8 et à 16', () => {
     const s = new Sim(5);
     const seen: string[] = [];
-    for (let i = 0; i < 90000 && s.phase !== 'dying' && s.phase !== 'dead' && s.score < 21; i++) {
+    for (let i = 0; i < 90000 && s.phase !== 'dying' && s.phase !== 'dead' && s.score < 17; i++) {
       const t = s.nextPair();
       if (s.phase === 'ready' || (s.vy > 0 && s.y > (t ? t.y + 25 : 300))) s.flap();
       s.step();
       for (const e of s.events) if (e.t === 'biome') seen.push(`${e.id}@${e.score}`);
       s.events = [];
     }
-    expect(seen.slice(0, 2)).toEqual(['ice@10', 'bamboo@20']);
+    expect(seen.slice(0, 2)).toEqual(['ice@8', 'bamboo@16']);
   });
 
   it('le bonus de record n\'est donné que si un record existait', () => {
@@ -160,22 +160,22 @@ describe('Feu', () => {
       (s2 as unknown as { spawn(): void }).spawn();
     }
     for (const p of s2.pairs) if (p.chili) seen.push(p.index);
-    expect(seen).toEqual([31, 34, 37, 111, 114, 117].filter((n) => n < 110 || true).filter((n) => seen.includes(n)));
-    expect(seen.slice(0, 3)).toEqual([31, 34, 37]);
+    expect(seen).toEqual([25, 28, 31, 89, 92, 95].filter((n) => n < 110 || true).filter((n) => seen.includes(n)));
+    expect(seen.slice(0, 3)).toEqual([25, 28, 31]);
     expect(s.pairs.length).toBeGreaterThan(0);
   });
 
   it('un piment lance un dash invincible de 2,5 s à ×1,6', () => {
     const s = new Sim(4);
     s.phase = 'playing';
-    s.score = 31;
+    s.score = 25;
     const p = s.nextPair()!;
     p.chili = { taken: false };
     p.x = C.PANDA_X;
     p.y = s.y;
     s.step();
     expect(s.dash).toBeGreaterThan(2.4);
-    expect(s.currentSpeed()).toBeCloseTo(Math.min(C.SPEED_MAX, C.SPEED_START + 1.5 * 31) * 1.6);
+    expect(s.currentSpeed()).toBeCloseTo(Math.min(C.SPEED_MAX, C.SPEED_START + 1.5 * 25) * 1.6);
     // pendant le dash, un mur ne tue pas
     s.y = C.GROUND_Y;
     s.step();
@@ -187,13 +187,13 @@ describe('Marais', () => {
   it('pets plus forts et gravité réduite après la première paire', () => {
     const s = new Sim(1);
     s.phase = 'playing';
-    s.score = 51;
+    s.score = 41;
     s.flap();
     s.step();
     expect(s.vy).toBeCloseTo(C.SWAMP_FLAP_VY + C.SWAMP_GRAVITY * C.STEP, 3);
     const t = new Sim(1);
     t.phase = 'playing';
-    t.score = 50;
+    t.score = 40;
     t.flap();
     t.step();
     expect(t.vy).toBeCloseTo(C.FLAP_VY + C.GRAVITY * C.STEP, 3);
@@ -204,7 +204,7 @@ describe('Orage', () => {
   it('annonce la rafale 1 s avant de la déclencher', () => {
     const s = new Sim(9);
     s.phase = 'playing';
-    s.score = 71;
+    s.score = 57;
     s.y = 300;
     s.step();
     expect(s.gust?.warn).toBeGreaterThan(0.9);

@@ -42,12 +42,12 @@ export const SPECIALS: Record<(typeof SPECIAL_ORDER)[number], BiomeInfo> = {
   },
 };
 
-/** Numéro du bloc de 10 points pour un score. */
+/** Numéro du bloc de 8 points pour un score. */
 export function blockOf(score: number): number {
   return Math.floor(score / BIOME_BLOCK);
 }
 
-/** Rang (0, 1, 2…) de la paire dans son biome : score - 10×bloc. */
+/** Rang (0, 1, 2…) de la paire dans son biome : score - 8×bloc. */
 export function localOf(score: number): number {
   return score - blockOf(score) * BIOME_BLOCK;
 }

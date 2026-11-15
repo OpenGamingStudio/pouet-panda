@@ -1,6 +1,6 @@
 # Pouet Panda
 
-Un flappy où un panda vole en pétant. Un appui = un pouet = une impulsion vers le haut. Il passe entre des tiges de bambou, ramasse des pièces et change de biome tous les 10 points. Jouable dans le navigateur, au doigt, à la souris et au clavier.
+Un flappy où un panda vole en pétant. Un appui = un pouet = une impulsion vers le haut. Il passe entre des tiges de bambou, ramasse des pièces et change de biome tous les 8 points. Jouable dans le navigateur, au doigt, à la souris et au clavier.
 
 A flappy-style web game: a panda flies by farting between bamboo stalks. One tap, one toot. Playable in the browser and on mobile.
 
@@ -14,7 +14,7 @@ A flappy-style web game: a panda flies by farting between bamboo stalks. One tap
 |---|---|
 | Contrôles | tap ou clic sur le plateau, `Espace`, `↑` ou `W` pour péter ; `Échap` ou `P` pour la pause (automatique si l'onglet est caché) |
 | Score | 1 point par paire de bambous franchie ; la vitesse monte et l'ouverture rétrécit avec le score |
-| Biomes | tous les 10 points : Bambouseraie (normale, la lumière change) puis un biome spécial, dans l'ordre Glace, Feu, Marais, Orage |
+| Biomes | tous les 8 points : Bambouseraie (normale, la lumière change) puis un biome spécial, dans l'ordre Glace, Feu, Marais, Orage |
 | Glace | le premier choc ne tue pas : le panda glisse, puis 1 s d'invincibilité (bouclier à côté du score) |
 | Feu | un piment donne un dash de 2,5 s (×1,6, invincible, guidé vers l'ouverture) |
 | Marais | pets 20 % plus forts, gravité réduite, un bambou sur deux bouge |
