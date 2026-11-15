@@ -3,6 +3,7 @@ import * as C from './config';
 import { SPECIALS, type BiomeId } from './biomes';
 import { Audio } from './audio';
 import { blendBiome, drawPanda, drawScene, Fx, makeView, INK, type Look, type View } from './render';
+import { ACHIEVEMENTS, challengeById, dayKey, evaluate, rollDaily } from './goals';
 import { freshSave, load, RESERVED_KEYS, write, type Loaded, type MotionPref, type Store } from './save';
 import { buy, equip, itemById, itemsOf, SHELVES, type Item, type Shelf } from './shop';
 import { Clock, Sim } from './sim';
@@ -48,13 +49,14 @@ const fx = new Fx();
 let sim = new Sim(seed());
 let clock = new Clock(sim);
 
-type Screen = 'menu' | 'play' | 'pause' | 'over' | 'shop' | 'settings';
+type Screen = 'menu' | 'play' | 'pause' | 'over' | 'shop' | 'settings' | 'goals';
 let screen: Screen = 'menu';
 let overAt = 0; // horloge (s) à laquelle le panneau de fin est apparu
 let finished = false;
 let shake = 0;
 let idleScroll = 0;
 
+let runBiomes: BiomeId[] = ['bamboo'];
 let shown = sim.plan.infoOf(0); // biome affiché (mélangé pendant le fondu)
 let prevBiome = shown;
 let nextBiome = shown;
@@ -146,19 +148,19 @@ motionQuery.addEventListener('change', applySettings);
 // ------------------------------------------------------------ écrans
 
 const SECTIONS: Record<Screen, string | null> = {
-  menu: 'menu', play: null, pause: 'pause', over: 'over', shop: 'shop', settings: 'settings',
+  menu: 'menu', play: null, pause: 'pause', over: 'over', shop: 'shop', settings: 'settings', goals: 'goals',
 };
 
 /** Où va le focus à l'arrivée sur un écran (le titre est lu par le lecteur d'écran). */
 const FIRST_FOCUS: Partial<Record<Screen, string>> = {
-  menu: 'btn-play', pause: 'btn-resume', over: 'btn-again', shop: 'shop-title', settings: 'settings-title',
+  menu: 'btn-play', pause: 'btn-resume', over: 'btn-again', shop: 'shop-title', settings: 'settings-title', goals: 'goals-title',
 };
 let settingsFrom: Screen = 'menu';
 let countdown = 0; // décompte (s) après une pause
 
 function show(next: Screen, focusId?: string): void {
   screen = next;
-  for (const id of ['menu', 'pause', 'over', 'shop', 'settings']) $(id).hidden = SECTIONS[next] !== id;
+  for (const id of ['menu', 'pause', 'over', 'shop', 'settings', 'goals']) $(id).hidden = SECTIONS[next] !== id;
   $('hud').hidden = !(next === 'play' || next === 'pause');
   $('hud').inert = next === 'pause'; // le dialogue de pause garde le focus
   if (next !== 'play') {
@@ -170,6 +172,7 @@ function show(next: Screen, focusId?: string): void {
   if (next === 'menu') refreshMenu();
   if (next === 'shop') openShop();
   if (next === 'settings') applySettings();
+  if (next === 'goals') renderGoals();
   if (next === 'menu') resetWorld();
   const target = focusId ?? FIRST_FOCUS[next];
   if (target) $(target).focus({ preventScroll: true });
@@ -188,6 +191,7 @@ function resetWorld(): void {
   shown = prevBiome = nextBiome = sim.plan.infoOf(0);
   shownId = 'bamboo';
   fade = 1;
+  runBiomes = ['bamboo'];
   finished = false;
   shake = 0;
   audio.setBiome('bamboo');
@@ -300,6 +304,7 @@ function handleEvents(): void {
         audio.setBiome(e.id);
         audio.biomeChange();
         showBanner(e.id);
+        if (!runBiomes.includes(e.id)) runBiomes.push(e.id);
         if (!saved.data.biomesSeen.includes(e.id)) saved.data.biomesSeen.push(e.id);
         setHidden('hud-ice', true);
         break;
@@ -340,6 +345,22 @@ function handleEvents(): void {
   sim.events = [];
 }
 
+function renderGoals(): void {
+  const d = saved.data;
+  rollDaily(d, dayKey(new Date()));
+  const c = challengeById(d.daily.id);
+  $('goals-daily').textContent = `${c?.desc ?? ''} ${d.daily.done ? 'Réussi, bravo !' : 'À faire.'}`;
+  $('goals-count').textContent = `(${d.achievements.length} sur ${ACHIEVEMENTS.length})`;
+  $('goals-list').replaceChildren(
+    ...ACHIEVEMENTS.map((a) => {
+      const got = d.achievements.includes(a.id);
+      const li = el('li', `rounded-xl border-[3px] border-ink px-3 py-2 ${got ? 'bg-sun' : 'bg-cream'}`);
+      li.append(el('span', 'block text-lg font-bold', `${a.name} : ${got ? 'obtenu' : 'à obtenir'}`), el('span', 'block text-base', a.desc));
+      return li;
+    }),
+  );
+}
+
 function finishGame(): void {
   finished = true;
   const prev = saved.data.best;
@@ -350,6 +371,13 @@ function finishGame(): void {
   d.totalCoins += sim.coins;
   d.games++;
   if (record) d.best = sim.score;
+  const res = evaluate(d, { score: sim.score, coins: sim.coins, biomes: runBiomes }, dayKey(new Date()));
+  const news = [
+    ...res.newAchievements.map((a) => `Succès : ${a.name}`),
+    ...(res.dailyJustDone ? ['Défi du jour réussi !'] : []),
+  ];
+  $('over-goals').textContent = news.join(' · ');
+  $('over-goals').hidden = news.length === 0;
   persist();
   $('over-score').textContent = String(sim.score);
   $('over-best').textContent = String(d.best);
@@ -608,6 +636,7 @@ window.addEventListener('keydown', (e) => {
     else if (screen === 'over' && e.code === 'Escape') toMenu();
     else if (screen === 'shop') show('menu', 'btn-shop');
     else if (screen === 'settings') closeSettings();
+    else if (screen === 'goals') show('menu', 'btn-goals');
   }
 });
 
@@ -631,6 +660,8 @@ $('btn-over-menu').addEventListener('click', toMenu);
 $('btn-shop').addEventListener('click', () => { audio.unlock(); show('shop'); });
 $('btn-over-shop').addEventListener('click', () => { show('shop'); });
 $('shop-back').addEventListener('click', () => show('menu', 'btn-shop'));
+$('btn-goals').addEventListener('click', () => { audio.unlock(); show('goals'); });
+$('goals-back').addEventListener('click', () => show('menu', 'btn-goals'));
 $('btn-settings').addEventListener('click', () => { audio.unlock(); settingsFrom = 'menu'; show('settings'); });
 $('settings-back').addEventListener('click', closeSettings);
 
@@ -758,7 +789,7 @@ function frame(now: number): void {
   if (screen === 'shop') {
     drawPreview(dt);
     // le plateau n'est pas dessiné derrière la boutique
-  } else if (screen !== 'settings') {
+  } else if (screen !== 'settings' && screen !== 'goals') {
     drawScene(ctx, view, {
       sim, look: look(), biome: shown, biomeId: shownId, fx, alpha, reduced: reduced(), shake,
       scrollIdle: idleScroll, showPanda: true,

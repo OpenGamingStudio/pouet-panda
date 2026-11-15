@@ -1,6 +1,7 @@
 import { SAVE_KEY, SAVE_VERSION } from './config';
 import { DEFAULTS, itemById, type Shelf } from './shop';
 import type { BiomeId } from './biomes';
+import { ACHIEVEMENT_IDS, DAILY_RE, challengeById, type DailyState } from './goals';
 
 export type MotionPref = 'auto' | 'yes' | 'no';
 
@@ -14,6 +15,8 @@ export interface SaveData {
   equipped: Record<Shelf, string>;
   settings: { sound: boolean; music: boolean; reducedMotion: MotionPref; volume: number; assist: boolean; flapKey: string };
   biomesSeen: BiomeId[];
+  achievements: string[];
+  daily: DailyState;
 }
 
 /** Stockage minimal (localStorage ou un faux pour les tests). */
@@ -38,6 +41,8 @@ export function freshSave(): SaveData {
     equipped: { ...DEFAULTS },
     settings: { sound: true, music: true, reducedMotion: 'auto', volume: 100, assist: false, flapKey: 'KeyW' },
     biomesSeen: ['bamboo'],
+    achievements: [],
+    daily: { day: '', id: '', done: false },
   };
 }
 
@@ -73,6 +78,12 @@ export function sanitize(raw: Record<string, unknown>): SaveData {
   if (typeof st.flapKey === 'string' && /^[A-Za-z0-9]{1,24}$/.test(st.flapKey) && !RESERVED_KEYS.includes(st.flapKey)) s.settings.flapKey = st.flapKey;
   const seen = Array.isArray(raw.biomesSeen) ? raw.biomesSeen : [];
   for (const b of seen) if (BIOMES.includes(b as BiomeId) && !s.biomesSeen.includes(b as BiomeId)) s.biomesSeen.push(b as BiomeId);
+  const ach = Array.isArray(raw.achievements) ? raw.achievements : [];
+  for (const a of ach) if (typeof a === 'string' && ACHIEVEMENT_IDS.includes(a) && !s.achievements.includes(a)) s.achievements.push(a);
+  const dy = (raw.daily ?? {}) as Record<string, unknown>;
+  if (typeof dy.day === 'string' && DAILY_RE.test(dy.day) && typeof dy.id === 'string' && challengeById(dy.id)) {
+    s.daily = { day: dy.day, id: dy.id, done: dy.done === true };
+  }
   return s;
 }
 

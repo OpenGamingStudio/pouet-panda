@@ -65,6 +65,11 @@ for (const shelf of ['fur', 'cloud', 'hat', 'sound']) {
 await page.click('#shop-back');
 await page.click('#btn-settings');
 await check('réglages', 'settings');
+await page.click('#settings-back');
+await page.click('#btn-goals');
+await check('défis', 'goals');
+await page.click('#goals-back');
+await page.waitForFunction(() => !document.getElementById('menu').hidden);
 
 if (errors.length) {
   failed += errors.length;
