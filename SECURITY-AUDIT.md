@@ -13,3 +13,8 @@ Portée : tout le code de `feat/v1` (front statique TypeScript compilé par Vite
 | Autres | Aucun `postMessage`, aucun lien sortant, aucun stockage tiers ; audio Web Audio démarré au premier geste ; le hook de test `window.__pp` n'existe que si l'URL contient `?e2e` (lecture seule de l'état, sans effet sur la sauvegarde). | RAS |
 
 À contrôler après déploiement : `curl -I https://pouetpanda.opengamingstudio.com` (si Traefik ajoute déjà des en-têtes, ils seraient en double).
+
+## Hors ligne (service worker)
+
+- `sw.js` est servi avec sa propre CSP (`security-headers-sw.inc`) : `default-src 'none'; connect-src 'self'`. Pour un worker, la CSP est celle de **sa réponse**, pas de la page ; avec `connect-src 'none'`, Chrome bloque tout `fetch` du worker (essai fait : installation en échec, navigation rechargée en `chrome-error`). La CSP du document ne change pas, hormis l'ajout de `worker-src 'self'` : `connect-src 'none'` y reste.
+- Le worker ne touche que l'origine du jeu (`origin` vérifiée), ne met en cache que les GET `200` de même origine, versionne son cache (`pouet-panda-<empreinte du build>`) et purge les autres caches `pouet-panda-*` à l'activation. `sw.js` et `index.html` : `Cache-Control: no-cache`.

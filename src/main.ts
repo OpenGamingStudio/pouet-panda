@@ -773,6 +773,14 @@ refreshMenu();
 if (!saved.persistent) toast('Progression non sauvegardée');
 requestAnimationFrame(frame);
 
+// Hors ligne : le service worker garde le jeu en cache (en dev, aucun : seul le build produit sw.js).
+// À la toute première visite, la page n'est pas passée par lui : un rechargement depuis le menu la fait mettre en cache.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  const first = !navigator.serviceWorker.controller;
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  if (first) navigator.serviceWorker.addEventListener('controllerchange', () => { if (screen === 'menu') location.reload(); }, { once: true });
+}
+
 // Pour les tests de bout en bout (lecture seule de l'état).
 if (location.search.includes('e2e')) {
   (window as unknown as { __pp?: unknown }).__pp = { get sim() { return sim; }, get screen() { return screen; } };
