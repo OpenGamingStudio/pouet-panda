@@ -14,7 +14,7 @@ A flappy-style web game: a panda flies by farting between bamboo stalks. One tap
 |---|---|
 | Contrôles | tap ou clic sur le plateau, `Espace`, `↑` ou `W` pour péter ; `Échap` ou `P` pour la pause (automatique si l'onglet est caché) |
 | Score | 1 point par paire de bambous franchie ; la vitesse monte et l'ouverture rétrécit avec le score |
-| Biomes | tous les 8 points : Bambouseraie (normale, la lumière change) puis un biome spécial, dans l'ordre Glace, Feu, Marais, Orage |
+| Biomes | tous les 8 points ; le 1er bloc est la Bambouseraie, puis tirage libre parmi Bambouseraie (normale, la lumière change), Glace, Feu, Marais, Orage, sans jamais le même deux fois de suite : les biomes spéciaux peuvent s'enchaîner (voir `docs/GDD.md`) |
 | Glace | le premier choc ne tue pas : le panda glisse, puis 1 s d'invincibilité (bouclier à côté du score) |
 | Feu | un piment donne un dash de 2,5 s (×1,6, invincible, guidé vers l'ouverture) |
 | Marais | pets 20 % plus forts, gravité réduite, un bambou sur deux bouge |
