@@ -1,0 +1,13 @@
+import puppeteer from '/root/.npm/_npx/8003d8991b0d346b/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js';
+import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
+const dist=process.argv[2];const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.woff2':'font/woff2','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
+const srv=http.createServer((q,r)=>{let f=path.join(dist,q.url==='/'?'index.html':q.url.split('?')[0]);if(!fs.existsSync(f)){r.statusCode=404;return r.end()}r.setHeader('content-type',mime[path.extname(f)]||'x');r.end(fs.readFileSync(f))}).listen(8232);
+const b=await puppeteer.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+const p=await b.newPage();await p.setViewport({width:320,height:568,isMobile:true,hasTouch:true});
+await p.goto('http://127.0.0.1:8232/');const sl=ms=>new Promise(r=>setTimeout(r,ms));await sl(500);
+const flat=(n,d=0,o=[])=>{if(!n)return o;if(!['generic','none','StaticText','InlineTextBox'].includes(n.role)||n.role==='StaticText')o.push('  '.repeat(d)+n.role+': '+(n.name||'')+(n.checked!==undefined?' [checked='+n.checked+']':'')+(n.value!==undefined?' [value='+n.value+']':''));(n.children||[]).forEach(c=>flat(c,d+1,o));return o};
+const snap=async t=>{console.log('## '+t);console.log(flat(await p.accessibility.snapshot({interestingOnly:true})).join('\n'))};
+const click=async id=>{await p.evaluate(i=>document.getElementById(i)?.click(),id);await sl(400)};
+await snap('menu');await click('btn-shop');await snap('boutique');await click('shop-back');await click('btn-settings');await snap('reglages');await click('settings-back');
+await click('btn-play');await sl(2500);await snap('partie');await p.keyboard.press('Escape');await sl(400);await snap('pause');
+await b.close();srv.close();
