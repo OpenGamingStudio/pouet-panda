@@ -36,7 +36,10 @@ export const COIN_BONUS_BIOME = 5;
 export const COIN_BONUS_RECORD = 10;
 
 // Biomes
-export const BIOME_BLOCK = 10; // un biome tous les 10 points
+export const BIOME_BLOCK = 8; // un biome tous les 8 points
+export const EASY_POINTS = 8; // les 8 premiers points sont un peu plus doux
+export const EASY_GAP_BONUS = 20;
+export const EASY_SPEED_MALUS = 15;
 export const SPECIAL_ORDER = ['ice', 'fire', 'swamp', 'storm'] as const;
 export const BANNER_TIME = 1.5;
 export const FADE_TIME = 0.5;

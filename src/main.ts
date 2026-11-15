@@ -436,7 +436,7 @@ function card(item: Item): HTMLElement {
   const cv = document.createElement('canvas');
   cv.width = 160;
   cv.height = 120;
-  cv.className = 'h-14 w-full sm:h-20';
+  cv.className = 'mx-auto block h-16 w-auto sm:h-20';
   cv.setAttribute('aria-hidden', 'true');
   drawThumb(cv, item);
   pic.append(cv);
@@ -557,7 +557,7 @@ function drawPreview(dt: number): void {
   pctx.fillStyle = '#7DB534';
   pctx.fillRect(0, h / dpr - 10, w / dpr, 10);
   pfx.draw(pctx);
-  drawPanda(pctx, w / dpr / 2, h / dpr / 2 + bob, Math.sin(pvTime * 4) * 0.1, l, 1.3);
+  drawPanda(pctx, w / dpr / 2, h / dpr / 2 + bob, Math.sin(pvTime * 4) * 0.1, l, 1.3, reduced() ? undefined : { t: pvTime, vy: Math.cos(pvTime * 4) * -300 });
 }
 
 // ------------------------------------------------------------ entrées

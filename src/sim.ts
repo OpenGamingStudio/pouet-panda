@@ -115,7 +115,8 @@ export class Sim {
   }
 
   private gapFor(index: number): number {
-    return Math.max(C.GAP_MIN, C.GAP_START - C.GAP_PER_POINT * index);
+    const easy = Math.max(0, 1 - index / C.EASY_POINTS); // 1 au départ, 0 au 8e point
+    return Math.max(C.GAP_MIN, C.GAP_START - C.GAP_PER_POINT * index) + Math.round(C.EASY_GAP_BONUS * easy);
   }
 
   private spawn(): void {
@@ -147,7 +148,8 @@ export class Sim {
 
   /** Vitesse de défilement courante. */
   currentSpeed(): number {
-    const base = Math.min(C.SPEED_MAX, C.SPEED_START + C.SPEED_PER_POINT * this.score) * (this.assist ? C.ASSIST_SPEED : 1);
+    const easy = Math.max(0, 1 - this.score / C.EASY_POINTS);
+    const base = (Math.min(C.SPEED_MAX, C.SPEED_START + C.SPEED_PER_POINT * this.score) - C.EASY_SPEED_MALUS * easy) * (this.assist ? C.ASSIST_SPEED : 1);
     return this.dash > 0 ? base * C.DASH_SPEED : base;
   }
 
