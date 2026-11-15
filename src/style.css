@@ -42,11 +42,12 @@ body {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
+  overflow-wrap: anywhere; /* aucun débordement horizontal, même à 200 % de zoom */
 }
 
 @layer components {
   .btn {
-    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border-[3px] border-ink bg-gum px-5 py-2 text-xl font-bold text-ink shadow-hard transition-transform duration-100 ease-out;
+    @apply inline-flex min-h-12 max-w-full flex-wrap items-center justify-center gap-x-2 rounded-2xl border-[3px] border-ink bg-gum px-3 py-2 text-center min-[360px]:px-5 text-xl font-bold text-ink shadow-hard transition-transform duration-100 ease-out;
     touch-action: manipulation;
   }
   .btn:active:not(:disabled) {
@@ -83,14 +84,14 @@ body {
     @apply min-h-16 px-10 text-3xl;
   }
   .btn-icon {
-    @apply min-w-12 px-0;
+    @apply min-w-12 shrink-0 px-0;
   }
   .panel {
     @apply border-[3px] border-ink bg-cream shadow-hard;
     border-radius: 22px 30px 20px 28px;
   }
   .chip {
-    @apply inline-flex min-h-10 items-center gap-2 rounded-xl border-[3px] border-ink bg-cream px-3 text-lg font-bold shadow-hard-sm;
+    @apply inline-flex min-h-10 max-w-full flex-wrap items-center gap-x-2 rounded-xl border-[3px] border-ink bg-cream px-3 text-lg font-bold shadow-hard-sm;
   }
   .logo {
     @apply font-bold text-gum;
@@ -101,7 +102,7 @@ body {
     letter-spacing: 0.01em;
   }
   .tab {
-    @apply min-h-11 min-w-11 shrink-0 flex-1 rounded-t-2xl border-[3px] border-b-0 border-ink bg-sand px-1 text-base sm:min-h-12 sm:text-lg font-bold;
+    @apply min-h-11 min-w-11 shrink-0 flex-1 rounded-t-2xl border-[3px] border-b-0 border-ink bg-sand px-1 text-sm min-[360px]:text-base sm:min-h-12 sm:text-lg font-bold;
   }
   .tab[aria-selected="true"] {
     @apply bg-sun;
@@ -135,7 +136,7 @@ body {
     @apply h-7 w-7 rounded-full border-[3px] border-solid border-ink bg-sun;
   }
   .seg {
-    @apply min-h-12 flex-1 border-[3px] border-ink bg-white px-3 text-lg font-bold;
+    @apply min-h-12 min-w-0 flex-1 border-[3px] border-ink bg-white px-1 text-base min-[360px]:px-3 min-[360px]:text-lg font-bold;
     margin-left: -3px;
   }
   .seg:first-child {

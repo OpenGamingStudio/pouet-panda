@@ -12,6 +12,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:e2e": "node e2e/axe.mjs",
+    "test:zoom": "node e2e/zoom.mjs",
     "test:offline": "node e2e/offline.mjs"
   },
   "devDependencies": {
