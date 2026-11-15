@@ -278,3 +278,33 @@ describe('mode assisté', () => {
     expect(b.recordBonus(0)).toBe(0);
   });
 });
+
+describe('rampe des biomes spéciaux', () => {
+  const ramp = (block: number): number => {
+    const s = new Sim(3);
+    s.score = block * C.BIOME_BLOCK;
+    return (s as unknown as { specialRamp(): number }).specialRamp();
+  };
+
+  it('x0,85 au 1er bloc spécial, +0,05 par bloc, plafonnée à x1,15', () => {
+    expect(ramp(1)).toBeCloseTo(0.85, 5);
+    expect(ramp(2)).toBeCloseTo(0.9, 5);
+    expect(ramp(7)).toBeCloseTo(1.15, 5);
+    expect(ramp(20)).toBeCloseTo(1.15, 5);
+  });
+
+  it('+8 px d\'ouverture par spécial enchaîné (max 2) dans spawn()', () => {
+    const gapAt = (forced: Array<[number, 'swamp' | 'fire' | 'bamboo']>, index: number): number => {
+      const s = new Sim(5);
+      forced.forEach(([sc, id]) => s.plan.force(sc, id));
+      const priv = s as unknown as { nextIndex: number; spawn(): void };
+      priv.nextIndex = index;
+      priv.spawn();
+      return s.pairs[s.pairs.length - 1]!.gap;
+    };
+    const base = gapAt([[8, 'bamboo'], [16, 'bamboo'], [24, 'bamboo']], 24);
+    expect(gapAt([[8, 'bamboo'], [16, 'bamboo'], [24, 'swamp']], 24)).toBe(base);
+    expect(gapAt([[8, 'bamboo'], [16, 'fire'], [24, 'swamp']], 24)).toBe(base + C.CHAIN_GAP_BONUS);
+    expect(gapAt([[8, 'fire'], [16, 'swamp'], [24, 'fire']], 24)).toBe(base + 2 * C.CHAIN_GAP_BONUS);
+  });
+});

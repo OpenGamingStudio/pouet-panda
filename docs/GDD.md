@@ -14,7 +14,7 @@ Le GDD d'origine (Nora, `panda-flappy`) prévoyait une alternance stricte : un b
 
 Le tirage libre est conservé (même biome jamais deux fois de suite, aucune alternance imposée). On corrige à la place ses écarts de difficulté et de récompense :
 
-- **Rampe d'intensité** : l'amplitude des paires mobiles du Marais (`SWAMP_MOVE_AMP`) et la force des rafales de l'Orage (`GUST_FORCE`) sont multipliées par x0,85 au 1er bloc, +0,05 par bloc, plafonnées à x1,15 au 7e bloc (`SPECIAL_RAMP_*`). Un biome spécial tiré tôt est donc plus doux, tiré tard plus exigeant, ce qui suit la courbe de vitesse et d'ouverture.
+- **Rampe d'intensité** : l'amplitude des paires mobiles du Marais (`SWAMP_MOVE_AMP`) et la force des rafales de l'Orage (`GUST_FORCE`) sont multipliées par x0,85 au 1er bloc spécial (le 2e bloc de la partie, le 1er étant la Bambouseraie), +0,05 par bloc, plafonnées à x1,15 au 8e bloc (`SPECIAL_RAMP_*`). Un biome spécial tiré tôt est donc plus doux, tiré tard plus exigeant, ce qui suit la courbe de vitesse et d'ouverture.
 - **Chaîne de spéciaux** : si un spécial suit un autre spécial, ses ouvertures gagnent +8 px par maillon au-delà du premier (`CHAIN_GAP_BONUS`, plafond 2 maillons, soit +16 px). Cela compense l'absence de Bambouseraie pour souffler.
 - **Récompense** : le bonus « biome spécial survécu » passe de 5 à 5 + 2 pièces par maillon enchaîné (`CHAIN_COIN_BONUS`, plafond +4), car il tombe moins régulièrement qu'avec l'alternance.
 - Inchangés : Glace (bouclier et glissade), Feu (piments aux rangs 1, 4, 7 et ruée), vitesse et ouverture de base.
