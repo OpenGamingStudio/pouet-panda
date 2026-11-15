@@ -8,25 +8,25 @@ export const STEP = 1 / 120; // pas fixe de la physique
 export const MAX_STEPS_PER_FRAME = 24; // garde-fou après un onglet endormi
 
 export const PANDA_X = 90;
-export const PANDA_R = 15; // hitbox (cercle)
+export const PANDA_R = 11; // hitbox (cercle)
 export const GRAVITY = 1800;
 export const FLAP_VY = -560;
 export const MAX_FALL = 900;
 export const TOP_OUT = 40; // sortir de plus de 40 px par le haut tue
 
-export const SPEED_START = 150;
-export const SPEED_PER_POINT = 2;
-export const SPEED_MAX = 230;
+export const SPEED_START = 125;
+export const SPEED_PER_POINT = 1.5;
+export const SPEED_MAX = 200;
 
-export const GAP_START = 170;
+export const GAP_START = 210;
 export const GAP_PER_POINT = 1;
-export const GAP_MIN = 135;
-export const PAIR_SPACING = 220;
+export const GAP_MIN = 165;
+export const PAIR_SPACING = 250;
 export const FIRST_PAIR_X = 500;
 export const BAMBOO_W = 56;
 export const GAP_CENTER_MIN = 140;
 export const GAP_CENTER_MAX = 500;
-export const GAP_CENTER_MAX_STEP = 180;
+export const GAP_CENTER_MAX_STEP = 110;
 
 // Pièces
 export const COIN_R = 10;

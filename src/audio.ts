@@ -99,9 +99,54 @@ export class Audio {
         this.tone(220 * j, 0.3, 'triangle', 0.08, 170 * j);
         break;
       default:
+        this.randomFart(j);
+    }
+  }
+
+  /** Pets pas chers : quelques variantes tirées au hasard (court, mouillé, aigu, long). */
+  private randomFart(j: number): void {
+    switch (Math.floor(Math.random() * 4)) {
+      case 0: // petit « pff »
         this.tone(190 * j, 0.16, 'sawtooth', 0.16, 90 * j);
         this.noise(0.1, 0.12, 400);
+        break;
+      case 1: // mouillé : grave qui vibre
+        this.wet(0.28, 95 * j, 55 * j);
+        break;
+      case 2: // aigu, « prit ! »
+        this.tone(420 * j, 0.09, 'square', 0.1, 210 * j);
+        this.noise(0.07, 0.1, 900);
+        break;
+      default: // long qui s'essouffle
+        this.wet(0.5, 130 * j, 45 * j);
+        this.noise(0.4, 0.08, 300);
     }
+  }
+
+  /** Grondement qui vibre vite (une onde carrée modulée par un oscillateur lent). */
+  private wet(dur: number, from: number, to: number): void {
+    const c = this.ctx;
+    if (!c || !this.master) return;
+    const t = c.currentTime;
+    const o = c.createOscillator();
+    const lfo = c.createOscillator();
+    const lg = c.createGain();
+    const g = c.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(from, t);
+    o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    lfo.frequency.value = 38;
+    lg.gain.value = from * 0.5;
+    lfo.connect(lg);
+    lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.2, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g);
+    g.connect(this.master);
+    o.start(t);
+    lfo.start(t);
+    o.stop(t + dur + 0.02);
+    lfo.stop(t + dur + 0.02);
   }
 
   coin(): void {
@@ -124,8 +169,8 @@ export class Audio {
   }
   die(): void {
     if (!this.sound) return;
-    this.tone(220, 0.35, 'sine', 0.25, 60);
-    this.noise(0.1, 0.15, 300);
+    this.wet(0.55, 150, 40); // la mort fait un long prout triste
+    this.tone(220, 0.35, 'sine', 0.2, 60);
   }
   biomeChange(): void {
     if (!this.sound) return;

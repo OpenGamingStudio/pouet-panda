@@ -414,7 +414,7 @@ function renderShop(focusKey?: string): void {
   const grid = $('grid');
   grid.setAttribute('aria-labelledby', `tab-${shelf}`);
   grid.replaceChildren();
-  const list = el('ul', 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4');
+  const list = el('ul', 'grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4');
   for (const item of itemsOf(shelf)) list.append(card(item));
   grid.append(list);
   const names = (Object.keys(tryOn) as Shelf[]).map((k) => itemById(tryOn[k])?.name ?? '').join(', ');
@@ -436,15 +436,15 @@ function card(item: Item): HTMLElement {
   const cv = document.createElement('canvas');
   cv.width = 160;
   cv.height = 120;
-  cv.className = 'h-20 w-full';
+  cv.className = 'h-14 w-full sm:h-20';
   cv.setAttribute('aria-hidden', 'true');
   drawThumb(cv, item);
   pic.append(cv);
   pic.addEventListener('click', () => select(item, `pic:${item.id}`));
-  const name = el('h3', 'text-center text-lg font-bold', item.name);
+  const name = el('h3', 'text-center text-base font-bold sm:text-lg', item.name);
   name.id = `name-${item.id}`;
   c.append(pic, name);
-  const b = el('button', 'btn min-h-12 text-lg');
+  const b = el('button', 'btn min-h-11 px-2 text-base sm:min-h-12 sm:text-lg');
   b.type = 'button';
   b.dataset.focus = `act:${item.id}`;
   b.setAttribute('aria-describedby', name.id); // « Acheter (400) », puis le nom de l'objet
