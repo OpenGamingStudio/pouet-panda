@@ -1,5 +1,6 @@
-// Test hors ligne : node e2e/offline.mjs <url> (image locale : docker build -t pouet-panda . && docker run -p 8080:80 pouet-panda). Demande puppeteer-core (non listé dans package.json : un audit signale des alertes sur ses dépendances) ; CHROME = chemin du navigateur. Code 1 si un contrôle échoue.
-const { default: puppeteer } = await import('puppeteer-core');
+// Test hors ligne : node e2e/offline.mjs <url> (image locale : docker build -t pouet-panda . && docker run -p 8080:80 pouet-panda). Utilise puppeteer (devDependency ; puppeteer-core en repli) ; CHROME = chemin du navigateur. Code 1 si un contrôle échoue.
+const { default: puppeteer } = await import('puppeteer').catch(() => import('puppeteer-core'));
+if (!process.argv[2]) { console.error('usage : node e2e/offline.mjs <url>'); process.exit(2); }
 const url = process.argv[2];
 const b = await puppeteer.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: 'new', args: ['--no-sandbox', '--disable-gpu'] });
 const p = await b.newPage();
@@ -21,7 +22,7 @@ if (process.env.SWCHANGE) {
 } else console.log('SKIP purge (pas de SWCHANGE)');
 await p.reload({ waitUntil: 'networkidle0' });
 const keys = await p.evaluate(() => caches.keys());
-if (process.env.SWCHANGE) check('anciens caches purgés, autres conservés : ' + keys.join(','), keys.includes('autre-site') && !keys.includes('pouet-panda-ancien') && !keys.includes('pouet-panda-74d6e32660'));
+if (process.env.SWCHANGE) check('anciens caches purgés, autres conservés : ' + keys.join(','), keys.includes('autre-site') && !keys.includes('pouet-panda-ancien'));
 const ver = keys.filter((k) => k.startsWith('pouet-panda-'));
 check('un seul cache versionné ' + ver.join(','), ver.length === 1 && /^pouet-panda-[0-9a-f]{10}$/.test(ver[0]));
 const n = await p.evaluate(async (k) => (await (await caches.open(k)).keys()).map((r) => new URL(r.url).pathname), ver[0]);
