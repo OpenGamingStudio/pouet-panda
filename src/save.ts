@@ -13,7 +13,7 @@ export interface SaveData {
   games: number;
   owned: string[];
   equipped: Record<Shelf, string>;
-  settings: { sound: boolean; music: boolean; reducedMotion: MotionPref; volume: number; assist: boolean; flapKey: string };
+  settings: { sound: boolean; music: boolean; reducedMotion: MotionPref; volume: number; assist: boolean; haptics: boolean; flapKey: string };
   biomesSeen: BiomeId[];
   achievements: string[];
   daily: DailyState;
@@ -39,7 +39,7 @@ export function freshSave(): SaveData {
     games: 0,
     owned: Object.values(DEFAULTS),
     equipped: { ...DEFAULTS },
-    settings: { sound: true, music: true, reducedMotion: 'auto', volume: 100, assist: false, flapKey: 'KeyW' },
+    settings: { sound: true, music: true, reducedMotion: 'auto', volume: 100, assist: false, haptics: true, flapKey: 'KeyW' },
     biomesSeen: ['bamboo'],
     achievements: [],
     daily: { day: '', id: '', done: false },
@@ -75,6 +75,7 @@ export function sanitize(raw: Record<string, unknown>): SaveData {
   }
   if (typeof st.volume === 'number' && Number.isFinite(st.volume)) s.settings.volume = Math.max(0, Math.min(100, Math.round(st.volume)));
   if (typeof st.assist === 'boolean') s.settings.assist = st.assist;
+  if (typeof st.haptics === 'boolean') s.settings.haptics = st.haptics;
   if (typeof st.flapKey === 'string' && /^[A-Za-z0-9]{1,24}$/.test(st.flapKey) && !RESERVED_KEYS.includes(st.flapKey)) s.settings.flapKey = st.flapKey;
   const seen = Array.isArray(raw.biomesSeen) ? raw.biomesSeen : [];
   for (const b of seen) if (BIOMES.includes(b as BiomeId) && !s.biomesSeen.includes(b as BiomeId)) s.biomesSeen.push(b as BiomeId);

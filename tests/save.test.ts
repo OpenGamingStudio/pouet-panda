@@ -106,5 +106,7 @@ describe('réglages d\'accessibilité', () => {
     expect(l.data.settings.flapKey).toBe('KeyW');
     const ok = load(fake({ [SAVE_KEY]: JSON.stringify({ v: 1, settings: { volume: 35, assist: true, flapKey: 'KeyJ' } }) }));
     expect(ok.data.settings).toMatchObject({ volume: 35, assist: true, flapKey: 'KeyJ' });
+    expect(load(fake({ [SAVE_KEY]: JSON.stringify({ v: 1, settings: { haptics: false } }) })).data.settings.haptics).toBe(false);
+    expect(load(fake({ [SAVE_KEY]: JSON.stringify({ v: 1, settings: { haptics: 'non' } }) })).data.settings.haptics).toBe(true);
   });
 });
