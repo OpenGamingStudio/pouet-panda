@@ -1,5 +1,5 @@
 import * as C from './config';
-import { biomeOf, type BiomeInfo } from './biomes';
+import { type BiomeInfo } from './biomes';
 import type { Sim } from './sim';
 
 export const INK = '#16110F';
@@ -504,4 +504,3 @@ function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, dir: 1 |
   ctx.restore();
 }
 
-export { biomeOf };

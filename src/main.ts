@@ -1,6 +1,6 @@
 import './style.css';
 import * as C from './config';
-import { biomeOf, SPECIALS, type BiomeId } from './biomes';
+import { SPECIALS, type BiomeId } from './biomes';
 import { Audio } from './audio';
 import { blendBiome, drawPanda, drawScene, Fx, makeView, INK, type Look, type View } from './render';
 import { freshSave, load, RESERVED_KEYS, write, type Loaded, type MotionPref, type Store } from './save';
@@ -55,7 +55,7 @@ let finished = false;
 let shake = 0;
 let idleScroll = 0;
 
-let shown = biomeOf(0); // biome affiché (mélangé pendant le fondu)
+let shown = sim.plan.infoOf(0); // biome affiché (mélangé pendant le fondu)
 let prevBiome = shown;
 let nextBiome = shown;
 let fade = 1;
@@ -185,7 +185,7 @@ function resetWorld(): void {
   sim = new Sim(seed());
   clock = new Clock(sim);
   fx.puffs = [];
-  shown = prevBiome = nextBiome = biomeOf(0);
+  shown = prevBiome = nextBiome = sim.plan.infoOf(0);
   shownId = 'bamboo';
   fade = 1;
   finished = false;
@@ -294,7 +294,7 @@ function handleEvents(): void {
         break;
       case 'biome': {
         prevBiome = shown;
-        nextBiome = biomeOf(e.score);
+        nextBiome = sim.plan.infoOf(e.score);
         shownId = e.id;
         fade = reduced() ? 1 : 0;
         audio.setBiome(e.id);

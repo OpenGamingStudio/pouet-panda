@@ -107,6 +107,8 @@ describe('paires', () => {
 describe('score, biomes et pièces', () => {
   it('l\'autopilote marque des points et le biome change à 8 et à 16', () => {
     const s = new Sim(5);
+    s.plan.force(8, 'ice');
+    s.plan.force(16, 'bamboo');
     const seen: string[] = [];
     for (let i = 0; i < 90000 && s.phase !== 'dying' && s.phase !== 'dead' && s.score < 17; i++) {
       const t = s.nextPair();
@@ -129,6 +131,7 @@ describe('score, biomes et pièces', () => {
 describe('Glace', () => {
   function iceSim(): Sim {
     const s = new Sim(2);
+    s.plan.force(10, 'ice');
     s.score = 10;
     s.shield = true;
     s.phase = 'playing';
@@ -155,6 +158,10 @@ describe('Feu', () => {
     // fabrique des paires jusqu'à l'indice 80 en avançant sans jouer
     const seen: number[] = [];
     const s2 = new Sim(4);
+    s2.plan.force(24, 'fire');
+    s2.plan.force(32, 'bamboo');
+    s2.plan.force(40, 'ice');
+    for (let b = 6; b < 14; b++) s2.plan.force(b * 8, 'swamp');
     s2.phase = 'playing';
     for (let i = 0; i < 90; i++) {
       (s2 as unknown as { spawn(): void }).spawn();
@@ -167,6 +174,7 @@ describe('Feu', () => {
 
   it('un piment lance un dash invincible de 2,5 s à ×1,6', () => {
     const s = new Sim(4);
+    s.plan.force(25, 'fire');
     s.phase = 'playing';
     s.score = 25;
     const p = s.nextPair()!;
@@ -187,12 +195,14 @@ describe('Marais', () => {
   it('pets plus forts et gravité réduite après la première paire', () => {
     const s = new Sim(1);
     s.phase = 'playing';
+    s.plan.force(41, 'swamp');
     s.score = 41;
     s.flap();
     s.step();
     expect(s.vy).toBeCloseTo(C.SWAMP_FLAP_VY + C.SWAMP_GRAVITY * C.STEP, 3);
     const t = new Sim(1);
     t.phase = 'playing';
+    t.plan.force(40, 'swamp');
     t.score = 40;
     t.flap();
     t.step();
@@ -204,6 +214,7 @@ describe('Orage', () => {
   it('annonce la rafale 1 s avant de la déclencher', () => {
     const s = new Sim(9);
     s.phase = 'playing';
+    s.plan.force(57, 'storm');
     s.score = 57;
     s.y = 300;
     s.step();
