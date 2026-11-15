@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "node e2e/axe.mjs"
+    "test:e2e": "node e2e/axe.mjs",
+    "test:offline": "node e2e/offline.mjs"
   },
   "devDependencies": {
     "@axe-core/puppeteer": "^4.14.0",
