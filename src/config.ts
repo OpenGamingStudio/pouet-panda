@@ -88,5 +88,7 @@ export const ASSIST_GRAVITY = 0.7;
 export const RESUME_COUNTDOWN = 2; // secondes de décompte après une pause
 
 // Sauvegarde
+/** Version du jeu (semver), alignée sur package.json ; affichée dans les Réglages. */
+export const VERSION = '1.1.0';
 export const SAVE_KEY = 'pouetpanda.save';
 export const SAVE_VERSION = 1;
