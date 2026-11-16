@@ -68,7 +68,7 @@ const stage = $<HTMLCanvasElement>('stage');
 const ctx = stage.getContext('2d')!;
 let view: View = makeView(360, 640, 1);
 
-const look = (): Look => ({ fur: saved.data.equipped.fur, cloud: saved.data.equipped.cloud, hat: saved.data.equipped.hat });
+const look = (): Look => ({ fur: saved.data.equipped.fur, cloud: saved.data.equipped.cloud, hat: saved.data.equipped.hat, face: saved.data.equipped.face, neck: saved.data.equipped.neck });
 
 function persist(): void {
   if (!write(store, saved) && !saved.persistent) toast('Progression non sauvegardée');
@@ -123,6 +123,7 @@ function applySettings(): void {
   sim.assist = s.assist;
   setHidden('hud-assist', !s.assist);
   document.documentElement.classList.toggle('reduce', reduced());
+  $('version').textContent = `Version ${C.VERSION}`;
   $('set-sound').setAttribute('aria-checked', String(s.sound));
   $('set-sound-v').textContent = s.sound ? 'Oui' : 'Non';
   $('set-music').setAttribute('aria-checked', String(s.music));
@@ -527,9 +528,11 @@ function drawThumb(cv: HTMLCanvasElement, item: Item): void {
   const g = cv.getContext('2d')!;
   g.fillStyle = '#8FD8FF';
   g.fillRect(0, 0, cv.width, cv.height);
-  const l: Look = { fur: 'fur.classic', cloud: 'cloud.cream', hat: 'hat.none' };
+  const l: Look = { fur: 'fur.classic', cloud: 'cloud.cream', hat: 'hat.none', face: 'face.none', neck: 'neck.none' };
   if (item.shelf === 'fur') l.fur = item.id;
   if (item.shelf === 'hat') l.hat = item.id;
+  if (item.shelf === 'face') l.face = item.id;
+  if (item.shelf === 'neck') l.neck = item.id;
   if (item.shelf === 'cloud') {
     const f = new Fx();
     f.fart(70, 52, item.id, false);
@@ -575,7 +578,7 @@ function drawPreview(dt: number): void {
     pv.height = h;
   }
   pvTime += dt;
-  const l: Look = { fur: tryOn.fur, cloud: tryOn.cloud, hat: tryOn.hat };
+  const l: Look = { fur: tryOn.fur, cloud: tryOn.cloud, hat: tryOn.hat, face: tryOn.face, neck: tryOn.neck };
   if (pvTime >= pvNext) {
     pvNext = pvTime + 1.3;
     pfx.fart(w / dpr / 2, h / dpr / 2, l.cloud, reduced());
@@ -589,7 +592,9 @@ function drawPreview(dt: number): void {
   pctx.fillStyle = '#7DB534';
   pctx.fillRect(0, h / dpr - 10, w / dpr, 10);
   pfx.draw(pctx);
-  drawPanda(pctx, w / dpr / 2, h / dpr / 2 + bob, Math.sin(pvTime * 4) * 0.1, l, 1.3, reduced() ? undefined : { t: pvTime, vy: Math.cos(pvTime * 4) * -300 });
+  const ph = h / dpr;
+  const sc = Math.min(1.3, (ph - 22) / 80); // chapeaux hauts : jamais coupés
+  drawPanda(pctx, w / dpr / 2, ph / 2 + 9 * sc + bob * sc / 1.3, Math.sin(pvTime * 4) * 0.1, l, sc, reduced() ? undefined : { t: pvTime, vy: Math.cos(pvTime * 4) * -300 });
 }
 
 // ------------------------------------------------------------ entrées

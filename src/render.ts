@@ -24,6 +24,8 @@ export interface Look {
   fur: string;
   cloud: string;
   hat: string;
+  face: string;
+  neck: string;
 }
 
 function hex(c: string): [number, number, number] {
@@ -143,7 +145,7 @@ function ell(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry
   }
 }
 
-export function drawHat(ctx: CanvasRenderingContext2D, hat: string): void {
+export function drawHat(ctx: CanvasRenderingContext2D, hat: string, sway = 0): void {
   ctx.lineWidth = 2.5;
   ctx.strokeStyle = INK;
   ctx.lineJoin = 'round';
@@ -170,10 +172,86 @@ export function drawHat(ctx: CanvasRenderingContext2D, hat: string): void {
     ell(ctx, -8, -29, 7, 7, CREAM);
     ell(ctx, 8, -29, 7, 7, CREAM);
     ell(ctx, 0, -33, 8, 8, CREAM);
+  } else if (hat === 'hat.party') {
+    ctx.beginPath(); ctx.moveTo(-10, -18); ctx.lineTo(0, -40); ctx.lineTo(10, -18); ctx.closePath();
+    ctx.fillStyle = '#B26BFF'; ctx.fill(); ctx.stroke();
+    ell(ctx, 0, -41 + sway, 3.5, 3.5, '#FFD60A', 0, 2);
+    rect(-4, -29, 8, 4, '#FFD60A');
+  } else if (hat === 'hat.headphones') {
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(0, -5, 19.5, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+    ctx.lineWidth = 2.5;
+    ell(ctx, -19, -5, 5, 8, '#3FA9F5');
+    ell(ctx, 19, -5, 5, 8, '#3FA9F5');
+  } else if (hat === 'hat.pirate') {
+    ctx.beginPath();
+    ctx.moveTo(-18, -17); ctx.quadraticCurveTo(-16, -34, 0, -32); ctx.quadraticCurveTo(16, -34, 18, -17);
+    ctx.quadraticCurveTo(0, -23, -18, -17); ctx.closePath();
+    ctx.fillStyle = INK; ctx.fill(); ctx.stroke();
+    ell(ctx, 0, -25, 3.5, 3.5, CREAM, 0, 0);
+  } else if (hat === 'hat.wizard') {
+    ctx.beginPath(); ctx.moveTo(-11, -18); ctx.quadraticCurveTo(-3, -32, 6 + sway, -45); ctx.quadraticCurveTo(10, -30, 11, -18); ctx.closePath();
+    ctx.fillStyle = '#5B3FD0'; ctx.fill(); ctx.stroke();
+    ell(ctx, 0, -18, 19, 4.5, '#5B3FD0');
+    ell(ctx, -1, -27, 2.5, 2.5, '#FFD60A', 0, 0);
+  } else if (hat === 'hat.duck') {
+    ell(ctx, 0, -25, 10, 7, '#FFD60A');
+    ell(ctx, 7, -33 + sway * 0.5, 6, 6, '#FFD60A');
+    ell(ctx, 13, -32 + sway * 0.5, 4, 2.2, '#FF9F1A', 0, 2);
+    ell(ctx, 8, -34 + sway * 0.5, 1.2, 1.2, INK, 0, 0);
+  } else if (hat === 'hat.halo') {
+    ctx.lineWidth = 6; ctx.strokeStyle = INK;
+    ctx.beginPath(); ctx.ellipse(0, -29 + sway * 0.6, 13, 4, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 3; ctx.strokeStyle = '#FFD60A';
+    ctx.beginPath(); ctx.ellipse(0, -29 + sway * 0.6, 13, 4, 0, 0, Math.PI * 2); ctx.stroke();
   } else if (hat === 'hat.bamboo') {
     rect(-3, -44, 6, 26, '#9BCB3C');
     ctx.beginPath(); ctx.moveTo(-3, -34); ctx.lineTo(3, -34); ctx.stroke();
     ell(ctx, 8, -40, 6, 3, '#6FA82C', -0.5, 1.8);
+  }
+}
+
+function drawFace(ctx: CanvasRenderingContext2D, face: string): void {
+  ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
+  if (face === 'face.glasses') {
+    ell(ctx, -8, -4, 7.5, 7.5, 'rgba(255,255,255,0.35)', 0, 2.5);
+    ell(ctx, 8, -4, 7.5, 7.5, 'rgba(255,255,255,0.35)', 0, 2.5);
+    ctx.beginPath(); ctx.moveTo(-0.5, -4); ctx.lineTo(0.5, -4); ctx.stroke();
+  } else if (face === 'face.shades') {
+    ctx.beginPath(); ctx.roundRect(-16, -9, 14, 10, 3); ctx.roundRect(2, -9, 14, 10, 3);
+    ctx.fillStyle = INK; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-2, -6); ctx.lineTo(2, -6); ctx.stroke();
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-13, -7, 4, 2); ctx.fillRect(5, -7, 4, 2);
+  } else if (face === 'face.mustache') {
+    ctx.beginPath();
+    ctx.moveTo(0, 4); ctx.quadraticCurveTo(-6, 0, -13, 5); ctx.quadraticCurveTo(-8, 9, 0, 6.5);
+    ctx.quadraticCurveTo(8, 9, 13, 5); ctx.quadraticCurveTo(6, 0, 0, 4); ctx.closePath();
+    ctx.fillStyle = '#6B3A1E'; ctx.fill(); ctx.stroke();
+  } else if (face === 'face.clown') {
+    ell(ctx, 0, 1, 5.5, 5.5, '#E8281E');
+    ell(ctx, -1.8, -0.8, 1.5, 1.5, '#FFFFFF', 0, 0);
+  }
+}
+
+function drawNeck(ctx: CanvasRenderingContext2D, neck: string, sway: number): void {
+  ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
+  if (neck === 'neck.bowtie') {
+    ctx.beginPath(); ctx.moveTo(0, 12); ctx.lineTo(-10, 6); ctx.lineTo(-10, 18); ctx.closePath();
+    ctx.moveTo(0, 12); ctx.lineTo(10, 6); ctx.lineTo(10, 18); ctx.closePath();
+    ctx.fillStyle = '#E8281E'; ctx.fill(); ctx.stroke();
+    ell(ctx, 0, 12, 3, 3, '#B01810', 0, 2);
+  } else if (neck === 'neck.scarf') {
+    ctx.save(); ctx.translate(11, 12); ctx.rotate(0.35 + sway * 0.05);
+    ctx.fillStyle = '#3FA9F5'; ctx.fillRect(-2, 0, 7, 14); ctx.strokeRect(-2, 0, 7, 14);
+    ctx.restore();
+    ctx.beginPath(); ctx.ellipse(0, 11, 17, 5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#FF4F9A'; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-10, 8, 4, 6); ctx.fillRect(4, 8, 4, 6);
+  } else if (neck === 'neck.medal') {
+    ctx.beginPath(); ctx.moveTo(-9, 9); ctx.lineTo(0, 22); ctx.lineTo(9, 9);
+    ctx.lineWidth = 3; ctx.strokeStyle = '#E8281E'; ctx.stroke();
+    ell(ctx, 0, 24 + sway * 0.4, 6, 6, '#FFD60A');
+    ell(ctx, 0, 24 + sway * 0.4, 2, 2, '#FFF1A0', 0, 0);
   }
 }
 
@@ -189,6 +267,7 @@ export function drawPanda(ctx: CanvasRenderingContext2D, x: number, y: number, a
   let ear = 0;
   let leg = 0;
   let blink = false;
+  let sway = 0; // accessoires : décalage vertical qui suit la montée / chute
   if (pose) {
     const up = Math.max(-1, Math.min(1, -pose.vy / 500)); // +1 : monte vite, -1 : tombe vite
     const flutter = Math.sin(pose.t * 22) * 0.35 * Math.max(0, up);
@@ -197,6 +276,7 @@ export function drawPanda(ctx: CanvasRenderingContext2D, x: number, y: number, a
     ear = -up * 0.35 + Math.sin(pose.t * 5) * 0.06;
     leg = Math.sin(pose.t * 9) * 2 - up * 2;
     blink = pose.t % 3.2 < 0.12;
+    sway = up * 2.5 + Math.sin(pose.t * 9) * 0.8;
   }
   // oreilles, jambes, corps, bras, tête
   ell(ctx, -14, -19 + ear * 4, 7, 7, f.patch);
@@ -229,7 +309,9 @@ export function drawPanda(ctx: CanvasRenderingContext2D, x: number, y: number, a
   ell(ctx, 0, 1, 3.2, 2.4, INK, 0, 0);
   ctx.lineWidth = 1.8; ctx.strokeStyle = INK;
   ctx.beginPath(); ctx.arc(0, 3, 4, 0.2, Math.PI - 0.2); ctx.stroke();
-  drawHat(ctx, look.hat);
+  drawNeck(ctx, look.neck, sway);
+  drawFace(ctx, look.face);
+  drawHat(ctx, look.hat, sway);
   ctx.restore();
 }
 

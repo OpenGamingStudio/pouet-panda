@@ -58,7 +58,7 @@ await page.click('#btn-pause-menu');
 await check('menu (retour)', 'menu');
 await page.click('#btn-shop');
 await check('boutique', 'shop');
-for (const shelf of ['fur', 'cloud', 'hat', 'sound']) {
+for (const shelf of ['fur', 'cloud', 'hat', 'face', 'neck', 'sound']) {
   await page.click(`#tab-${shelf}`);
   await check(`boutique, onglet ${shelf}`, 'shop');
 }
