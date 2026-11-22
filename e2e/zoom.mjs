@@ -1,6 +1,7 @@
 // Test de bout en bout : aucun débordement horizontal de 320 à 430 px, y compris à 200 % de zoom
 // (un zoom de 200 % équivaut à une fenêtre deux fois plus étroite en px CSS : 160 à 215 px).
 // Usage : npm run build && npm run test:zoom   (PUPPETEER_EXECUTABLE_PATH pour un Chrome système)
+import { stubApi, isApi } from './stub-api.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
@@ -45,6 +46,7 @@ const overflow = () =>
 let page;
 for (const width of [160, 180, 195, 215, 320, 360, 390, 430]) {
   page = await browser.newPage();
+  await stubApi(page);
   await page.setViewport({ width, height: width < 300 ? 320 : 780, deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
   await page.evaluateOnNewDocument(() => localStorage.setItem('pouetpanda.best', '123456'));
