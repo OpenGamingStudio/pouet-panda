@@ -1,6 +1,7 @@
 // Test de bout en bout : sert dist/ en local, ouvre le jeu dans Chrome (puppeteer)
 // et exige 0 violation axe-core (WCAG 2.0/2.1/2.2 A + AA, bonnes pratiques) sur chaque écran.
 // Usage : npm run build && npm run test:e2e   (PUPPETEER_EXECUTABLE_PATH pour un Chrome système)
+import { stubApi, isApi } from './stub-api.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
@@ -27,11 +28,12 @@ const url = `http://127.0.0.1:${server.address().port}/`;
 
 const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
 const page = await browser.newPage();
+await stubApi(page);
 await page.setViewport({ width: 390, height: 780, deviceScaleFactor: 1 });
 await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
-page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+page.on('console', (m) => m.type() === 'error' && !isApi(m) && errors.push(m.text()));
 await page.goto(url, { waitUntil: 'networkidle0' });
 
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));

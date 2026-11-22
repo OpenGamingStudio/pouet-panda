@@ -1,10 +1,12 @@
 // Test hors ligne : node e2e/offline.mjs <url> (image locale : docker build -t pouet-panda . && docker run -p 8080:80 pouet-panda). Utilise puppeteer (devDependency ; puppeteer-core en repli) ; CHROME = chemin du navigateur. Code 1 si un contrôle échoue.
 const { default: puppeteer } = await import('puppeteer').catch(() => import('puppeteer-core'));
+const { stubApi, isApi } = await import('./stub-api.mjs');
 if (!process.argv[2]) { console.error('usage : node e2e/offline.mjs <url>'); process.exit(2); }
 const url = process.argv[2];
 const b = await puppeteer.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', headless: 'new', args: ['--no-sandbox', '--disable-gpu'] });
 const p = await b.newPage();
-const errs = []; p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); }); p.on('pageerror', (e) => errs.push(String(e)));
+await stubApi(p);
+const errs = []; p.on('console', (m) => { if (m.type() === 'error' && !isApi(m)) errs.push(m.text()); }); p.on('pageerror', (e) => errs.push(String(e)));
 let ok = true; const check = (n, v) => { console.log(v ? 'OK  ' : 'FAIL', n); if (!v) ok = false; };
 await p.setViewport({ width: 390, height: 700 });
 await p.goto(url + '?e2e', { waitUntil: 'networkidle0' });

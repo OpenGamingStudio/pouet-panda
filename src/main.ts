@@ -5,7 +5,7 @@ import { Audio } from './audio';
 import { blendBiome, drawPanda, drawScene, Fx, makeView, INK, type Look, type View } from './render';
 import { ACHIEVEMENTS, challengeById, dayKey, evaluate, rollDaily } from './goals';
 import { buzz, canVibrate } from './haptics';
-import { freshSave, load, RESERVED_KEYS, write, type Loaded, type MotionPref, type Store } from './save';
+import { freshSave, load, RESERVED_KEYS, sanitize, write, type Loaded, type MotionPref, type Store } from './save';
 import { buy, equip, itemById, itemsOf, SHELVES, type Item, type Shelf } from './shop';
 import { Clock, Sim } from './sim';
 
@@ -39,6 +39,7 @@ function storage(): Store | null {
   }
 }
 
+const int0 = (x: unknown): number => (typeof x === 'number' && Number.isFinite(x) && x >= 0 ? Math.floor(x) : 0);
 const seed = () => (Math.random() * 0xffffffff) >>> 0;
 
 // ------------------------------------------------------------ état
@@ -178,6 +179,7 @@ function show(next: Screen, focusId?: string): void {
   if (next === 'settings') applySettings();
   if (next === 'goals') renderGoals();
   if (next === 'menu') resetWorld();
+  window.OGSAccount?.show(next === 'menu');
   const target = focusId ?? FIRST_FOCUS[next];
   if (target) $(target).focus({ preventScroll: true });
   else if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
@@ -816,6 +818,24 @@ function frame(now: number): void {
     });
   }
   requestAnimationFrame(frame);
+
+// Compte OpenGamingStudio (facultatif) : sauvegarde en ligne, bouton « Compte » sur le menu seulement.
+window.OGSAccount?.init({
+  game: 'pouet-panda',
+  version: C.VERSION,
+  color: '#2B2B2B',
+  getSave: () => saved.data,
+  isEmpty: (d) => !d || (int0(d.games) === 0 && int0(d.totalCoins) === 0 && int0(d.best) === 0),
+  describe: (d) => `Record ${int0(d.best)}, ${int0(d.totalCoins)} pièces`,
+  applySave: (d) => {
+    if (!saved.writable || typeof d !== 'object' || d === null || int0(d.v) > C.SAVE_VERSION) return;
+    saved = { ...saved, data: sanitize(d) };
+    persist();
+    applySettings();
+    refreshMenu();
+  },
+});
+window.OGSAccount?.show(screen === 'menu');
 }
 
 setHidden('set-haptics-box', !canVibrate());
